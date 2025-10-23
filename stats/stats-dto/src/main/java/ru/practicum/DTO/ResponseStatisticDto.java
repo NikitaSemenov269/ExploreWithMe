@@ -1,0 +1,24 @@
+package ru.practicum.DTO;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
+public class ResponseStatisticDto {
+    @NotBlank(message = "Название сервиса обязательное поле.")
+    private String app;
+
+    private String uri;
+
+    @Min(value = 0, message = "Количество не может быть отрицательным.")
+    private Integer hits;
+}
+
+
