@@ -1,15 +1,13 @@
 package ru.practicum.Interfaces;
 
-
 import ru.practicum.DTO.ResponseStatisticDto;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-public interface StaticRepository {
+public interface StaticService {
     Collection<ResponseStatisticDto> findStaticEvent(List<String> uris,
-                                                     LocalDateTime start,
-                                                     LocalDateTime end,
+                                                     String start,
+                                                     String end,
                                                      Boolean unique);
 }

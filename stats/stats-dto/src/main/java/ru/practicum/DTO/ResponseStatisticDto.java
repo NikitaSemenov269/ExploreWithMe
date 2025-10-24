@@ -17,7 +17,6 @@ public class ResponseStatisticDto {
 
     private String uri;
 
-    @Min(value = 0, message = "Количество не может быть отрицательным.")
     private Integer hits;
 }
 

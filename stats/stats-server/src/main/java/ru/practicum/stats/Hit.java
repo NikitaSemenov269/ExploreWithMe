@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.stats;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -12,8 +12,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "statics_data")
-public class StatisticData {
+@Table(name = "hits")
+public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; // тип int согласно swagger, класс-обертка Integer для работы с null.
