@@ -2,6 +2,8 @@ package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.DTO.RequestStatisticDto;
@@ -23,7 +25,7 @@ public class StatsController {
     @PostMapping("/hit")
     public ResponseEntity<Void> saveHit(@Valid @RequestBody RequestStatisticDto requestStatisticDto) {
         statsClient.saveHit(requestStatisticDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/stats")
