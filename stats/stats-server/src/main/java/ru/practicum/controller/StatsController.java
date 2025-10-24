@@ -1,4 +1,4 @@
-package ru.practicum.client;
+package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
+import ru.practicum.client.StatsClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
