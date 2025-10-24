@@ -49,32 +49,32 @@ public class StaticServiceImpl implements StaticService {
         if (startStr == null || startStr.isBlank() || endStr == null || endStr.isBlank()) {
             log.error("");
             // throw new ("");
-        } else {
+        }
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            try {
-                start = LocalDateTime.parse(startStr, formatter);
-                end = LocalDateTime.parse(endStr, formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        try {
+            start = LocalDateTime.parse(startStr, formatter);
+            end = LocalDateTime.parse(endStr, formatter);
 
-                if (end.isBefore(start)) {
-                    // подставить нужное исключение
-                    //  throw new ("Время окончания аренды не может наступить раньше начала аренды.");
-                }
-                if (end.equals(start)) {
-                    // подставить нужное исключение
-                    //  throw new ("Время начала и окончания аренды не могут совпадать.");
-                }
-                // установить более узкий перехват исключений
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            if (end.isBefore(start)) {
+                // подставить нужное исключение
+                //  throw new ("Время окончания аренды не может наступить раньше начала аренды.");
             }
+            if (end.equals(start)) {
+                // подставить нужное исключение
+                //  throw new ("Время начала и окончания аренды не могут совпадать.");
+            }
+            // установить более узкий перехват исключений
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         try {
             Collection<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
             log.info("");
             return result;
             // установить более узкий перехват исключений
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             throw new ValidationException();
         }
     }
