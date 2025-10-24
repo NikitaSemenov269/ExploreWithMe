@@ -1,9 +1,12 @@
 package ru.practicum.stats;
 
+import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
+import ru.practicum.Interfaces.StaticMapper;
 import ru.practicum.Interfaces.StaticRepository;
 import ru.practicum.Interfaces.StaticService;
 
@@ -17,6 +20,19 @@ import java.util.List;
 @AllArgsConstructor
 public class StaticServiceImpl implements StaticService {
     private final StaticRepository staticRepository;
+    private final StaticMapper mapper;
+
+    @Override
+    public void addHit(RequestStatisticDto requestStatisticDto) {
+        try {
+            Hit hit = mapper.toEntity(requestStatisticDto);
+            staticRepository.addHit(hit);
+            log.info("");
+            // установить более узкий перехват исключений
+        } catch (Exception e) {
+            //   throw new
+        }
+    }
 
     @Override
     public Collection<ResponseStatisticDto> findStaticEvent(List<String> uris,
@@ -53,8 +69,13 @@ public class StaticServiceImpl implements StaticService {
                 throw new RuntimeException(e);
             }
         }
-
-        staticRepository.findStaticEvent(uris, start, end, unique);
-        return null;
+        try {
+            Collection<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
+            log.info("");
+            return result;
+            // установить более узкий перехват исключений
+        } catch (Exception e) {
+            throw new ValidationException();
+        }
     }
 }
