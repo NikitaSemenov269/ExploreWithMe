@@ -1,6 +1,6 @@
-package GlobalExceptionHandler;
+package ru.practicum.GlobalExceptionHandler;
 
-import exception.NotFoundException;
+import ru.practicum.exception.NotFoundException;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

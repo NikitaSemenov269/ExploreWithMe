@@ -9,6 +9,9 @@ import ru.practicum.DTO.ResponseStatisticDto;
 import ru.practicum.Interfaces.StaticMapper;
 import ru.practicum.Interfaces.StaticRepository;
 import ru.practicum.Interfaces.StaticService;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.DataIntegrityException;
+import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,12 +28,27 @@ public class StaticServiceImpl implements StaticService {
     @Override
     public void addHit(RequestStatisticDto requestStatisticDto) {
         try {
+            if (requestStatisticDto == null) {
+                throw new DataIntegrityException("DTO запроса статистики не может быть null");
+            }
+            if (requestStatisticDto.getApp() == null || requestStatisticDto.getApp().isBlank()) {
+                throw new DataIntegrityException("Название приложения не может быть пустым");
+            }
+            if (requestStatisticDto.getUri() == null || requestStatisticDto.getUri().isBlank()) {
+                throw new DataIntegrityException("URI не может быть пустым");
+            }
+            if (requestStatisticDto.getIp() == null || requestStatisticDto.getIp().isBlank()) {
+                throw new DataIntegrityException("IP-адрес не может быть пустым");
+            }
             Hit hit = mapper.toEntity(requestStatisticDto);
             staticRepository.addHit(hit);
-            log.info("");
-            // установить более узкий перехват исключений
+            log.info("Хит успешно добавлен для URI: {}", requestStatisticDto.getUri());
+        } catch (ValidationException e) {
+            log.error("Ошибка валидации при добавлении хита: {}", e.getMessage());
+            throw e;
         } catch (Exception e) {
-            //   throw new
+            log.error("Неожиданная ошибка при добавлении хита: {}", e.getMessage(), e);
+            throw new ConflictException("Не удалось добавить хит из-за внутренней ошибки");
         }
     }
 
@@ -40,42 +58,51 @@ public class StaticServiceImpl implements StaticService {
                                                             String endStr,
                                                             Boolean unique) {
         if (unique == null) {
-            // throw new ("");
+            throw new DataIntegrityException("Параметр unique не может быть null");
         }
-
-        LocalDateTime start = null;
-        LocalDateTime end = null;
 
         if (startStr == null || startStr.isBlank() || endStr == null || endStr.isBlank()) {
-            log.error("");
-            // throw new ("");
+            log.error("Параметры времени начала и окончания не могут быть пустыми");
+            throw new DataIntegrityException("Параметры времени начала и окончания обязательны");
         }
 
+        LocalDateTime start;
+        LocalDateTime end;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         try {
             start = LocalDateTime.parse(startStr, formatter);
             end = LocalDateTime.parse(endStr, formatter);
 
             if (end.isBefore(start)) {
-                // подставить нужное исключение
-                //  throw new ("Время окончания аренды не может наступить раньше начала аренды.");
+                throw new DataIntegrityException("Время окончания не может быть раньше времени начала");
             }
+
             if (end.equals(start)) {
-                // подставить нужное исключение
-                //  throw new ("Время начала и окончания аренды не могут совпадать.");
+                throw new DataIntegrityException("Время начала и окончания не могут совпадать");
+            }
+
+            // Дополнительная валидация - не допускаем будущее время
+            if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
+                throw new DataIntegrityException("Время начала и окончания не могут быть в будущем");
             }
             // установить более узкий перехват исключений
         } catch (Exception e) {
+            log.error("Неожиданная ошибка: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
+
         try {
             Collection<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
-            log.info("");
+            log.info("Успешно найдено {} записей статистики для URI: {}", result.size(), uris);
             return result;
             // установить более узкий перехват исключений
-        } catch (
-                Exception e) {
-            throw new ValidationException();
+        } catch (NotFoundException e) {
+            log.warn("Статистика не найдена для указанных критериев");
+            throw e;
+        } catch (Exception e) {
+            log.error("Ошибка базы данных при получении статистики: {}", e.getMessage(), e);
+            throw new ValidationException("Не удалось получить статистику из-за ошибки базы данных");
         }
     }
 }

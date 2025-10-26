@@ -1,4 +1,4 @@
-package GlobalExceptionHandler;
+package ru.practicum.GlobalExceptionHandler;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
