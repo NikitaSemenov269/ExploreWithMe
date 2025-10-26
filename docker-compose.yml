@@ -7,6 +7,8 @@ services:
       - "9090:9090"
     depends_on:
       - stats-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats-db
 
   stats-db:
     image: postgres:16.1
@@ -16,6 +18,7 @@ services:
         POSTGRES_DB: stats-db
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: 12345
+        PGPORT: 5432
     volumes:
         - stats-db-data:/var/lib/postgresql/data
 
@@ -27,6 +30,8 @@ services:
       - "8080:8080"
     depends_on:
       - ewm-db
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5433/ewm-db
 
   ewm-db:
     image: postgres:16.1
@@ -36,6 +41,7 @@ services:
       POSTGRES_DB: ewm-db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 12345
+      PGPORT: 5433
     volumes:
         - ewm-db-data:/var/lib/postgresql/data
 
