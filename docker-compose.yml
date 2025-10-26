@@ -40,5 +40,5 @@ services:
         - ewm-db-data:/var/lib/postgresql/data
 
 volumes:
-#  ewm-db-data:
+  ewm-db-data:
   stats-db-data:
