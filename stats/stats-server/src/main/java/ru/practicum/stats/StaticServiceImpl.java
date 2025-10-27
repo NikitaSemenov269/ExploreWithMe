@@ -14,7 +14,6 @@ import ru.practicum.exception.DataIntegrityException;
 import ru.practicum.exception.NotFoundException;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 
@@ -53,54 +52,40 @@ public class StaticServiceImpl implements StaticService {
     }
 
     @Override
-    public Collection<ResponseStatisticDto> findStaticEvent(List<String> uris,
-                                                            String startStr,
-                                                            String endStr,
-                                                            Boolean unique) {
+    public List<ResponseStatisticDto> findStaticEvent(List<String> uris,
+                                                      LocalDateTime start,
+                                                      LocalDateTime end,
+                                                      Boolean unique) {
         if (unique == null) {
             throw new DataIntegrityException("Параметр unique не может быть null");
         }
 
-        if (startStr == null || startStr.isBlank() || endStr == null || endStr.isBlank()) {
+        if (start == null || end == null) {
             log.error("Параметры времени начала и окончания не могут быть пустыми");
             throw new DataIntegrityException("Параметры времени начала и окончания обязательны");
         }
 
-        LocalDateTime start;
-        LocalDateTime end;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        try {
-            start = LocalDateTime.parse(startStr, formatter);
-            end = LocalDateTime.parse(endStr, formatter);
-
-            if (end.isBefore(start)) {
-                throw new DataIntegrityException("Время окончания не может быть раньше времени начала");
-            }
-
-            if (end.equals(start)) {
-                throw new DataIntegrityException("Время начала и окончания не могут совпадать");
-            }
-
-            // Дополнительная валидация - не допускаем будущее время
-            if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
-                throw new DataIntegrityException("Время начала и окончания не могут быть в будущем");
-            }
-            // установить более узкий перехват исключений
-        } catch (Exception e) {
-            log.error("Неожиданная ошибка: {}", e.getMessage(), e);
-            throw new RuntimeException(e);
+        if (end.isBefore(start)) {
+            throw new DataIntegrityException("Время окончания не может быть раньше времени начала");
         }
 
+        if (end.equals(start)) {
+            throw new DataIntegrityException("Время начала и окончания не могут совпадать");
+        }
+
+        if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
+            throw new DataIntegrityException("Время начала и окончания не могут быть в будущем");
+        }
         try {
-            Collection<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
+            List<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
             log.info("Успешно найдено {} записей статистики для URI: {}", result.size(), uris);
             return result;
-            // установить более узкий перехват исключений
-        } catch (NotFoundException e) {
+        } catch (
+                NotFoundException e) {
             log.warn("Статистика не найдена для указанных критериев");
             throw e;
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             log.error("Ошибка базы данных при получении статистики: {}", e.getMessage(), e);
             throw new ValidationException("Не удалось получить статистику из-за ошибки базы данных");
         }

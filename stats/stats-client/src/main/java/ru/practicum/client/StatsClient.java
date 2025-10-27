@@ -1,3 +1,4 @@
+/*
 package ru.practicum.client;
 
 import org.springframework.http.MediaType;
@@ -40,3 +41,4 @@ public class StatsClient {
                 .body(ResponseStatisticDto.class);
     }
 }
+*/

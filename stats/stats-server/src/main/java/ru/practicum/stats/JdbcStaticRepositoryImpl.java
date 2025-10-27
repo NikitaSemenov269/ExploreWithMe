@@ -10,7 +10,6 @@ import ru.practicum.DTO.ResponseStatisticDto;
 import ru.practicum.Interfaces.StaticRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,10 +45,10 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
     }
 
     @Override
-    public Collection<ResponseStatisticDto> findHits(List<String> uris,
-                                                     LocalDateTime start,
-                                                     LocalDateTime end,
-                                                     Boolean unique) {
+    public List<ResponseStatisticDto> findHits(List<String> uris,
+                                               LocalDateTime start,
+                                               LocalDateTime end,
+                                               Boolean unique) {
         try {
             String sql = """
                     SELECT app, uri,
