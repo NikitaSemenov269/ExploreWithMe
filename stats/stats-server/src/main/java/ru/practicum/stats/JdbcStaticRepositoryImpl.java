@@ -44,35 +44,54 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
         }
     }
 
-    @Override
     public List<ResponseStatisticDto> findHits(List<String> uris,
                                                LocalDateTime start,
                                                LocalDateTime end,
                                                Boolean unique) {
         try {
-            String sql = """
-                    SELECT app, uri,
-                    CASE WHEN :unique = TRUE THEN COUNT(DISTINCT ip)
-                    ELSE COUNT(*) END as hits
-                    FROM hits_data
-                    WHERE
-                        (:urisCount = 0 OR uri IN (:uris))
-                        AND timestamp >= :start
-                        AND timestamp <= :end
-                    GROUP BY app, uri
-                    ORDER BY hits DESC
-                    """;
-
             Map<String, Object> params = new HashMap<>();
             params.put("start", start);
             params.put("end", end);
             params.put("unique", unique);
 
-            if (uris != null && !uris.isEmpty()) {
-                params.put("uris", uris);
-                params.put("urisCount", uris.size());
+            String sql;
+
+            if (uris != null && uris.contains("/events/")) {
+                // Все события
+                sql = """
+                        SELECT app, uri,
+                        CASE WHEN :unique = TRUE THEN COUNT(DISTINCT ip)
+                        ELSE COUNT(*) END as hits
+                        FROM hits_data
+                        WHERE timestamp >= :start AND timestamp <= :end
+                        AND uri LIKE '/events/%'
+                        GROUP BY app, uri
+                        ORDER BY hits DESC
+                        """;
+            } else if (uris != null && !uris.isEmpty()) {
+                // Конкретные URI
+                sql = """
+                        SELECT app, uri,
+                        CASE WHEN :unique = TRUE THEN COUNT(DISTINCT ip)
+                        ELSE COUNT(*) END as hits
+                        FROM hits_data
+                        WHERE timestamp >= :start AND timestamp <= :end
+                        AND uri = ANY(:uris)
+                        GROUP BY app, uri
+                        ORDER BY hits DESC
+                        """;
+                params.put("uris", uris.toArray(new String[0]));
             } else {
-                params.put("urisCount", 0);
+                // Все URI без фильтра
+                sql = """
+                        SELECT app, uri,
+                        CASE WHEN :unique = TRUE THEN COUNT(DISTINCT ip)
+                        ELSE COUNT(*) END as hits
+                        FROM hits_data
+                        WHERE timestamp >= :start AND timestamp <= :end
+                        GROUP BY app, uri
+                        ORDER BY hits DESC
+                        """;
             }
 
             return jdbc.query(sql, params, (rs, rowNum) -> {
@@ -82,9 +101,11 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
                         rs.getInt("hits")
                 );
             });
+
         } catch (DataAccessException e) {
             log.error("Ошибка при получении статистики: {}", e.getMessage());
             throw e;
         }
     }
+
 }
