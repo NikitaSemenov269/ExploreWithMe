@@ -1,8 +1,6 @@
-# Базовый образ с Java 21
 FROM eclipse-temurin:21-jre-jammy
-# Копируем JAR-файл
 COPY ./target/ewm-service-*.jar ./app.jar
-# Открываем порт
+COPY wait-for-it.sh /wait-for-it.sh
+RUN chmod +x /wait-for-it.sh
 EXPOSE 8080
-# Запускаем приложение
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["/wait-for-it.sh", "stats-server:9090", "--", "java", "-jar", "app.jar"]
