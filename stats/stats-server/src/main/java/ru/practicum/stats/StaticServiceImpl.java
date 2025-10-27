@@ -68,9 +68,12 @@ public class StaticServiceImpl implements StaticService {
             throw new DataIntegrityException("Время окончания не может быть раньше времени начала");
         }
 
-        if (end.equals(start.plusMinutes(15))) {
-            throw new DataIntegrityException("Разница между началом и окончанием" +
-                    " события не может быть менее 15 минут.");
+        if (end.equals(start)) {
+            throw new DataIntegrityException("Время начала и окончания не могут совпадать");
+        }
+
+        if (start.isAfter(LocalDateTime.now()) || end.isAfter(LocalDateTime.now())) {
+            throw new DataIntegrityException("Время начала и окончания не могут быть в будущем");
         }
         try {
             List<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
