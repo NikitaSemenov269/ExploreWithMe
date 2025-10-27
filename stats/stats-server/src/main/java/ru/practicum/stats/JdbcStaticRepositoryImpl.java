@@ -53,17 +53,27 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
             String sql = """
                     SELECT app, uri,
                     CASE WHEN :unique = TRUE THEN COUNT(DISTINCT ip)
-                    ELSE COUNT (*) END as hits FROM hits_data WHERE
-                    (:uris IS NULL OR uri IN (:uris)) AND timestamp >= :start
-                    AND timestamp <= :end GROUP BY app, uri
+                    ELSE COUNT(*) END as hits
+                    FROM hits_data
+                    WHERE
+                        (:urisCount = 0 OR uri IN (:uris))
+                        AND timestamp >= :start
+                        AND timestamp <= :end
+                    GROUP BY app, uri
                     ORDER BY hits DESC
                     """;
 
             Map<String, Object> params = new HashMap<>();
-            params.put("uris", uris);
             params.put("start", start);
             params.put("end", end);
             params.put("unique", unique);
+
+            if (uris != null && !uris.isEmpty()) {
+                params.put("uris", uris);
+                params.put("urisCount", uris.size());
+            } else {
+                params.put("urisCount", 0);
+            }
 
             return jdbc.query(sql, params, (rs, rowNum) -> {
                 return new ResponseStatisticDto(
@@ -78,4 +88,3 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
         }
     }
 }
-

@@ -1,6 +1,7 @@
 package ru.practicum;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.util.List;
 
 // Нужно инжектить в класс-контроллер, или сервисный слой (в зависимости от задачи) микросервиса wm-service.
 @Component
+@ConditionalOnProperty(name = "ewm-service.url")
 public class StatsClient {
     private final RestClient restClient;
 
