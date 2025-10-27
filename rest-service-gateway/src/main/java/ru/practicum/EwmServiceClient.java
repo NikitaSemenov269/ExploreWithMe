@@ -1,4 +1,3 @@
-/*
 package ru.practicum;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -17,4 +16,3 @@ public class EwmServiceClient {
 
     // методы в зависимости от требований ФЗ ( swagger ).
 }
-*/
