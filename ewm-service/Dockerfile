@@ -2,7 +2,5 @@
 FROM eclipse-temurin:21-jre-jammy
 # Копируем JAR-файл
 COPY target/*.jar ewm-service.jar
-# Открываем порт
-EXPOSE 8080
-# Запускаем приложение
-ENTRYPOINT "java", "-jar", "/ewm-service.jar"
+# Запускаем приложение (исправленная версия)
+ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]
