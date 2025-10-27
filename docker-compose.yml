@@ -7,6 +7,8 @@ services:
       - stats-db
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 12345
 
   stats-db:
     image: postgres:16.1
@@ -33,6 +35,9 @@ services:
       - stats-server
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5433/ewm-db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 12345
+      STATS_SERVER_URL: http://stats-server:9090
 
   ewm-db:
     image: postgres:16.1

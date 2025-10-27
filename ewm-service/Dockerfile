@@ -2,5 +2,5 @@
 FROM eclipse-temurin:21-jre-jammy
 # Копируем JAR-файл
 COPY target/*.jar ewm-service.jar
-# Запускаем приложение
-ENTRYPOINT ["sh", "-c", "java", "-jar", "/ewm-service.jar"]
+# Запускаем приложение (исправленная версия)
+ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]
