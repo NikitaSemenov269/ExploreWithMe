@@ -5,4 +5,4 @@ COPY ./target/ewm-service-*.jar ./app.jar
 # Открываем порт
 EXPOSE 8080
 # Запускаем приложение
-ENTRYPOINT "java", "-jar", "app.jar"
+ENTRYPOINT ["java", "-jar", "app.jar"]
