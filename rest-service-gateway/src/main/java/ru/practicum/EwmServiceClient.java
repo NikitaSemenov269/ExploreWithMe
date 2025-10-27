@@ -1,3 +1,4 @@
+/*
 package ru.practicum;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -5,10 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 @Component
-public class EwmService {
+public class EwmServiceClient {
     private final RestClient restClient;
 
-    public EwmService(@Value("${ewm-service.url}") String baseUrl) {
+    public EwmServiceClient(@Value("${ewm-service.url}") String baseUrl) {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .build();
@@ -16,3 +17,4 @@ public class EwmService {
 
     // методы в зависимости от требований ФЗ ( swagger ).
 }
+*/
