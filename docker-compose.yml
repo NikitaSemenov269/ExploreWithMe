@@ -18,6 +18,11 @@ services:
       POSTGRES_PASSWORD: 12345
     volumes:
       - stats-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
   ewm-service:
     build: ./ewm-service
@@ -39,6 +44,11 @@ services:
       POSTGRES_PASSWORD: 12345
     volumes:
       - ewm-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
 
 volumes:
   ewm-db-data:
