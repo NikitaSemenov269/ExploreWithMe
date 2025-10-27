@@ -44,6 +44,7 @@ public class JdbcStaticRepositoryImpl implements StaticRepository {
         }
     }
 
+    @Override
     public List<ResponseStatisticDto> findHits(List<String> uris,
                                                LocalDateTime start,
                                                LocalDateTime end,

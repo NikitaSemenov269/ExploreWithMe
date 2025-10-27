@@ -29,15 +29,7 @@ public class StaticServiceImpl implements StaticService {
             if (requestStatisticDto == null) {
                 throw new DataIntegrityException("DTO запроса статистики не может быть null");
             }
-            if (requestStatisticDto.getApp() == null || requestStatisticDto.getApp().isBlank()) {
-                throw new DataIntegrityException("Название приложения не может быть пустым");
-            }
-            if (requestStatisticDto.getUri() == null || requestStatisticDto.getUri().isBlank()) {
-                throw new DataIntegrityException("URI не может быть пустым");
-            }
-            if (requestStatisticDto.getIp() == null || requestStatisticDto.getIp().isBlank()) {
-                throw new DataIntegrityException("IP-адрес не может быть пустым");
-            }
+
             Hit hit = mapper.toEntity(requestStatisticDto);
             staticRepository.addHit(hit);
             log.info("Хит успешно добавлен для URI: {}", requestStatisticDto.getUri());
@@ -55,6 +47,10 @@ public class StaticServiceImpl implements StaticService {
                                                       LocalDateTime start,
                                                       LocalDateTime end,
                                                       Boolean unique) {
+        if (uris == null || uris.isEmpty()) {
+            throw new DataIntegrityException("Параметр uris не может быть null, или пустой коллекцией");
+        }
+
         if (unique == null) {
             throw new DataIntegrityException("Параметр unique не может быть null");
         }

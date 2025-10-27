@@ -25,6 +25,7 @@ public class Hit {
     @Column(name = "app", nullable = false)
     private String app;
 
+    @NotBlank(message = "URI не может быть пустым")
     @Column(name = "uri")
     private String uri;
 

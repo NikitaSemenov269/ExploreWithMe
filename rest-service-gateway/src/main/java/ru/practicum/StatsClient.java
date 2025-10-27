@@ -14,7 +14,7 @@ import java.util.List;
 
 // Нужно инжектить в класс-контроллер, или сервисный слой (в зависимости от задачи) микросервиса wm-service.
 @Component
-@ConditionalOnProperty(name = "ewm-service.url")
+@ConditionalOnProperty(name = "stats-server.url")
 public class StatsClient {
     private final RestClient restClient;
 
