@@ -3,10 +3,11 @@ FROM eclipse-temurin:21-jre-jammy
 # Задаём рабочий каталог
 WORKDIR /app
 # Копируем JAR-файл
-COPY . .
+COPY pom.xml .
+COPY src ./src
 RUN mvn clean package
 # Запускаем приложение (исправленная версия)
 FROM eclipse-temurin:21-jre-jammy
-VOLUME /app
+WORKDIR /app
 COPY --from=builder /app/target/*.jar ewm-service.jar
 ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]
