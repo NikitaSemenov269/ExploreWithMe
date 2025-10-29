@@ -16,7 +16,7 @@ public class ResponseStatisticDto {
 
     private String uri;
 
-    private Integer hits;
+    private Long hits;
 }
 
 
