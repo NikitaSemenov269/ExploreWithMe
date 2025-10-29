@@ -13,7 +13,7 @@ public interface StaticJPARepository extends JpaRepository<Hit, Integer> {
 
     // Все URI (uris = null || uris.isEmpty())
     @Query("""
-            SELECT new com.example.dto.ResponseStatisticDto(
+            SELECT new ru.practicum.DTO.ResponseStatisticDto(
                 h.app, h.uri,
                 CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END
             )
@@ -28,7 +28,7 @@ public interface StaticJPARepository extends JpaRepository<Hit, Integer> {
 
     // Конкретные URI
     @Query("""
-            SELECT new com.example.dto.ResponseStatisticDto(
+            SELECT new ru.practicum.DTO.ResponseStatisticDto(
                 h.app, h.uri,
                 CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END
             )
@@ -45,7 +45,7 @@ public interface StaticJPARepository extends JpaRepository<Hit, Integer> {
 
     // Все события (/events/)
     @Query("""
-            SELECT new com.example.dto.ResponseStatisticDto(
+            SELECT new ru.practicum.DTO.ResponseStatisticDto(
                 h.app, h.uri,
                 CASE WHEN :unique = true THEN COUNT(DISTINCT h.ip) ELSE COUNT(h) END
             )
