@@ -5,11 +5,10 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 # Копируем pom.xml и исходники
-COPY pom.xml .
-COPY src ./src
+COPY ../../ .
 
 # Скачиваем зависимости и собираем JAR
-RUN mvn package
+RUN mvn clean package -pl ewm-service -am
 
 # Этап 2: запуск приложения в минимальном окружении
 FROM eclipse-temurin:21-jre-jammy
