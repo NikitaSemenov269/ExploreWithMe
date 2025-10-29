@@ -4,10 +4,11 @@ import jakarta.validation.ValidationException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
 import ru.practicum.Interfaces.StaticMapper;
-import ru.practicum.Interfaces.StaticRepository;
+import ru.practicum.Interfaces.StaticJPARepository;
 import ru.practicum.Interfaces.StaticService;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.DataIntegrityException;
@@ -19,8 +20,9 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class StaticServiceImpl implements StaticService {
-    private final StaticRepository staticRepository;
+    private final StaticJPARepository staticJPARepository;
     private final StaticMapper mapper;
 
     @Override
@@ -39,7 +41,7 @@ public class StaticServiceImpl implements StaticService {
                 throw new DataIntegrityException("IP-адрес не может быть пустым");
             }
             Hit hit = mapper.toEntity(requestStatisticDto);
-            staticRepository.addHit(hit);
+            staticJPARepository.save(hit);
             log.info("Хит успешно добавлен для URI: {}", requestStatisticDto.getUri());
         } catch (ValidationException e) {
             log.error("Ошибка валидации при добавлении хита: {}", e.getMessage());
@@ -73,9 +75,13 @@ public class StaticServiceImpl implements StaticService {
                     " события не может быть менее 15 минут.");
         }
         try {
-            List<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
-            log.info("Успешно найдено {} записей статистики для URI: {}", result.size(), uris);
-            return result;
+            if (uris == null || uris.isEmpty()) {
+                return staticJPARepository.findAllHits(start, end, unique);
+            } else if (uris.contains("/events/")) {
+                return staticJPARepository.findEventHits(start, end, unique);
+            } else {
+                return staticJPARepository.findHitsByUris(start, end, unique, uris);
+            }
         } catch (
                 NotFoundException e) {
             log.warn("Статистика не найдена для указанных критериев");
