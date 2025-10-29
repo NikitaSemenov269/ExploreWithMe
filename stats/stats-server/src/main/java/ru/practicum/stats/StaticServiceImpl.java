@@ -26,18 +26,7 @@ public class StaticServiceImpl implements StaticService {
     @Override
     public void addHit(RequestStatisticDto requestStatisticDto) {
         try {
-            if (requestStatisticDto == null) {
-                throw new DataIntegrityException("DTO запроса статистики не может быть null");
-            }
-            if (requestStatisticDto.getApp() == null || requestStatisticDto.getApp().isBlank()) {
-                throw new DataIntegrityException("Название приложения не может быть пустым");
-            }
-            if (requestStatisticDto.getUri() == null || requestStatisticDto.getUri().isBlank()) {
-                throw new DataIntegrityException("URI не может быть пустым");
-            }
-            if (requestStatisticDto.getIp() == null || requestStatisticDto.getIp().isBlank()) {
-                throw new DataIntegrityException("IP-адрес не может быть пустым");
-            }
+            hitValidation(requestStatisticDto);
             Hit hit = mapper.toEntity(requestStatisticDto);
             staticRepository.addHit(hit);
             log.info("Хит успешно добавлен для URI: {}", requestStatisticDto.getUri());
@@ -55,6 +44,38 @@ public class StaticServiceImpl implements StaticService {
                                                       LocalDateTime start,
                                                       LocalDateTime end,
                                                       Boolean unique) {
+        staticEventValidation(start, end, unique);
+        try {
+            List<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
+            log.info("Успешно найдено {} записей статистики для URI: {}", result.size(), uris);
+            return result;
+        } catch (
+                NotFoundException e) {
+            log.warn("Статистика не найдена для указанных критериев");
+            throw e;
+        } catch (
+                Exception e) {
+            log.error("Ошибка базы данных при получении статистики: {}", e.getMessage(), e);
+            throw new ValidationException("Не удалось получить статистику из-за ошибки базы данных");
+        }
+    }
+
+    private static void hitValidation(RequestStatisticDto requestStatisticDto) {
+        if (requestStatisticDto == null) {
+            throw new DataIntegrityException("DTO запроса статистики не может быть null");
+        }
+        if (requestStatisticDto.getApp() == null || requestStatisticDto.getApp().isBlank()) {
+            throw new DataIntegrityException("Название приложения не может быть пустым");
+        }
+        if (requestStatisticDto.getUri() == null || requestStatisticDto.getUri().isBlank()) {
+            throw new DataIntegrityException("URI не может быть пустым");
+        }
+        if (requestStatisticDto.getIp() == null || requestStatisticDto.getIp().isBlank()) {
+            throw new DataIntegrityException("IP-адрес не может быть пустым");
+        }
+    }
+
+    private static void staticEventValidation(LocalDateTime start, LocalDateTime end, Boolean unique) {
         if (unique == null) {
             throw new DataIntegrityException("Параметр unique не может быть null");
         }
@@ -71,19 +92,6 @@ public class StaticServiceImpl implements StaticService {
         if (end.equals(start.plusMinutes(15))) {
             throw new DataIntegrityException("Разница между началом и окончанием" +
                     " события не может быть менее 15 минут.");
-        }
-        try {
-            List<ResponseStatisticDto> result = staticRepository.findHits(uris, start, end, unique);
-            log.info("Успешно найдено {} записей статистики для URI: {}", result.size(), uris);
-            return result;
-        } catch (
-                NotFoundException e) {
-            log.warn("Статистика не найдена для указанных критериев");
-            throw e;
-        } catch (
-                Exception e) {
-            log.error("Ошибка базы данных при получении статистики: {}", e.getMessage(), e);
-            throw new ValidationException("Не удалось получить статистику из-за ошибки базы данных");
         }
     }
 }
