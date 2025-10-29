@@ -1,21 +1,6 @@
-FROM maven:3.9-eclipse-temurin-21 AS builder
-
-WORKDIR /app
-
-# Копируем ВЕСЬ проект (из корня проекта)
-COPY ../../ .
-
-# Собираем только ewm-service модуль
-RUN mvn clean package -DskipTests -pl ewm-service -am
-
-# Этап 2: запуск приложения
+# Базовый образ с Java 21
 FROM eclipse-temurin:21-jre-jammy
-
-WORKDIR /app
-
-# Копируем JAR из ewm-service модуля
-COPY --from=builder /app/ewm-service/target/*.jar app.jar
-
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Копируем JAR-файл
+COPY target/*.jar ewm-service.jar
+# Запускаем приложение (исправленная версия)
+ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]
