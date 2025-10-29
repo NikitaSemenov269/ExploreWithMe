@@ -26,6 +26,7 @@ public class StaticServiceImpl implements StaticService {
     private final StaticMapper mapper;
 
     @Override
+    @Transactional
     public void addHit(RequestStatisticDto requestStatisticDto) {
         try {
             hitValidation(requestStatisticDto);
