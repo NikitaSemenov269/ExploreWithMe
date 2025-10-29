@@ -1,26 +1,21 @@
-# Этап 1: сборка приложения с Maven
 FROM maven:3.9-eclipse-temurin-21 AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем pom.xml и исходники
+# Копируем ВЕСЬ проект (из корня проекта)
 COPY ../../ .
 
-# Скачиваем зависимости и собираем JAR
-RUN mvn clean package -pl ewm-service -am
+# Собираем только ewm-service модуль
+RUN mvn clean package -DskipTests -pl ewm-service -am
 
-# Этап 2: запуск приложения в минимальном окружении
+# Этап 2: запуск приложения
 FROM eclipse-temurin:21-jre-jammy
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем собранный JAR из этапа сборки
-COPY --from=builder /app/target/*.jar ewm-service.jar
+# Копируем JAR из ewm-service модуля
+COPY --from=builder /app/ewm-service/target/*.jar app.jar
 
-# Открываем порт (укажите нужный, например 8080)
 EXPOSE 8080
 
-# Запускаем приложение
-ENTRYPOINT ["java", "-jar", "ewm-service.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

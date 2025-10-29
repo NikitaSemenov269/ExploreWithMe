@@ -1,26 +1,22 @@
 # Этап 1: сборка приложения с Maven
 FROM maven:3.9-eclipse-temurin-21 AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем pom.xml и исходники
+# Копируем ВЕСЬ проект (из корня проекта)
 COPY ../../ .
 
-# Скачиваем зависимости и собираем JAR
-RUN mvn clean package -pl stats-server -am
+# Собираем только stats-server модуль
+RUN mvn clean package -DskipTests -pl stats-server -am
 
-# Этап 2: запуск приложения в минимальном окружении
+# Этап 2: запуск приложения
 FROM eclipse-temurin:21-jre-jammy
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем собранный JAR из этапа сборки
-COPY --from=builder /app/target/*.jar stats-server.jar
+# Копируем JAR из stats-server модуля
+COPY --from=builder /app/stats-server/target/*.jar app.jar
 
-# Открываем порт (укажите нужный, например 9090)
 EXPOSE 9090
 
-# Запускаем приложение
-ENTRYPOINT ["java", "-jar", "stats-server.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
