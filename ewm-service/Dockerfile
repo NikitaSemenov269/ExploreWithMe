@@ -7,6 +7,6 @@ COPY . .
 RUN mvn clean package
 # Запускаем приложение (исправленная версия)
 FROM eclipse-temurin:21-jre-jammy
-VOLUME /tmp
+VOLUME /app
 COPY --from=builder /app/target/*.jar ewm-service.jar
 ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]

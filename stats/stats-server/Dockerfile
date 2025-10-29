@@ -7,6 +7,6 @@ COPY . .
 RUN mvn clean package
 # Запускаем приложение
 FROM eclipse-temurin:21-jre-jammy
-VOLUME /tmp
+VOLUME /app
 COPY --from=builder /app/target/*.jar stats-server.jar
 ENTRYPOINT ["java", "-jar", "/stats-server.jar"]
