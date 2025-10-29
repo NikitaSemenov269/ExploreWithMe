@@ -1,6 +1,12 @@
 # Базовый образ с Java 21
 FROM eclipse-temurin:21-jre-jammy
+# Задаём рабочий каталог
+WORKDIR /app
 # Копируем JAR-файл
-COPY target/*.jar ewm-service.jar
+COPY . .
+RUN mvn clean package
 # Запускаем приложение (исправленная версия)
+FROM eclipse-temurin:21-jre-jammy
+VOLUME /tmp
+COPY --from=builder /app/target/*.jar ewm-service.jar
 ENTRYPOINT ["java", "-jar", "/ewm-service.jar"]
