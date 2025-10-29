@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-@Mapper(componentModel = org.mapstruct.MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = "spring")
 public interface StaticMapper {
 
     DateTimeFormatter DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
