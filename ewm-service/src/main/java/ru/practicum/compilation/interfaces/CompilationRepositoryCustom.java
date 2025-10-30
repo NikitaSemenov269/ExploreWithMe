@@ -1,10 +1,12 @@
 package ru.practicum.compilation.interfaces;
 
-import ru.practicum.compilation.Compilation;
+import org.springframework.stereotype.Repository;
+import ru.practicum.compilation.DTO.ResponseCompilationDto;
 
 import java.util.List;
 
+@Repository
 public interface CompilationRepositoryCustom {
-    // Черновой метод для образца.
-    List<Compilation> findByNameContains(String namePart);
+
+    public List<ResponseCompilationDto> getCompilations(Boolean pinned);
 }

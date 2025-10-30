@@ -7,21 +7,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "compilations")
-// Черновик сущности для тестовой генерации QClass
 public class Compilation {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "")
-    @Column(name = "name")
-    private String name;
+    @NotBlank(message = "Описание подборки не может быть пустой строкой, или null.")
+    @Column(name = "title")
+    private String title;
 
+    @Column(name = "pinned")
+    private Boolean pinned;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    private Set<Long> eventsId;
 }
