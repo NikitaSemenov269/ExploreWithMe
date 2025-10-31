@@ -5,8 +5,6 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.compilation.Compilation;
 
-import java.util.Collection;
-
 @Repository
 public interface CompilationRepository extends JpaRepository<Compilation, Long>,
         QuerydslPredicateExecutor<Compilation>,
@@ -26,5 +24,6 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long>,
         - Кастомные методы для сложной бизнес-логики
         - Сложные QueryDSL запросы, JOIN операции
 
-     Для расширения функциональности добавляйте методы в CompilationRepositoryCustom.*/
+     Для методов, которые могут быть обработаны JPA Spring boot - добавляйте их в этот интерфейс.
+     Для расширения более сложной функциональности добавляйте методы в CompilationRepositoryCustom.*/
 }
