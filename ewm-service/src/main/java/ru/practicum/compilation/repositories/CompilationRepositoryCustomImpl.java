@@ -28,7 +28,7 @@ public class CompilationRepositoryCustomImpl implements CompilationRepositoryCus
 
     @Override
     public List<ResponseCompilationDto> findCompilations(Boolean pinned, Pageable pageable) {
-
+        // Пин приходит, либо не призодит и тогда null
         List<Compilation> compilations;
 
         if (pinned) {
