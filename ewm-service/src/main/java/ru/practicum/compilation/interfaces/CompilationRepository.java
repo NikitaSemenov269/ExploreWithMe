@@ -5,6 +5,8 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.compilation.Compilation;
 
+import java.util.Collection;
+
 @Repository
 public interface CompilationRepository extends JpaRepository<Compilation, Long>,
         QuerydslPredicateExecutor<Compilation>,

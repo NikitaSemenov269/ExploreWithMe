@@ -2,9 +2,10 @@ package ru.practicum.compilation.interfaces;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.DTO.compilation.CompilationDto;
+import ru.practicum.DTO.compilation.ResponseCompilationDto;
 import ru.practicum.compilation.Compilation;
-import ru.practicum.compilation.DTO.RequestCompilationDto;
-import ru.practicum.compilation.DTO.ResponseCompilationDto;
+import ru.practicum.DTO.compilation.RequestCompilationDto;
 
 import java.util.List;
 
@@ -13,8 +14,10 @@ public interface CompilationMapper {
 
     Compilation toEntity(RequestCompilationDto requestCompilationDto);
 
+    CompilationDto toDto(Compilation compilation);
+
     @Mapping(target = "events", ignore = true)
-    ResponseCompilationDto toDto(Compilation compilation);
+    ResponseCompilationDto toResponseDto(Compilation compilation);
 
     List<ResponseCompilationDto> toCollectionDto(List<Compilation> compilations);
 
