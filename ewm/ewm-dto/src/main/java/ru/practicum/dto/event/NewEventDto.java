@@ -1,6 +1,7 @@
 package ru.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -63,6 +64,7 @@ public class NewEventDto {
     /**
      * Ограничение на количество участников. 0 = без ограничения (по умолчанию 0)
      */
+    @Min(value = 0, message = "Лимит участников не может быть отрицательным")
     @Builder.Default
     private Integer participantLimit = 0;
 
