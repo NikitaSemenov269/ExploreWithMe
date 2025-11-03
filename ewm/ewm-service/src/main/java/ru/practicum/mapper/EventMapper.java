@@ -6,9 +6,7 @@ import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventAdminRequest;
 import ru.practicum.dto.event.UpdateEventUserRequest;
-import ru.practicum.model.Category;
 import ru.practicum.model.Event;
-import ru.practicum.model.User;
 
 /**
  * Маппер для преобразования Event entity в DTO и обратно
