@@ -1,4 +1,4 @@
-package ru.practicum.Interfaces;
+package ru.practicum.interfaces;
 
 import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;

@@ -1,4 +1,4 @@
-package ru.practicum.Interfaces;
+package ru.practicum.interfaces;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

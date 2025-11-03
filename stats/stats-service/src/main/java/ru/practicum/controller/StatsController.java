@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
-import ru.practicum.Interfaces.StaticService;
+import ru.practicum.interfaces.StaticService;
 
 import java.time.LocalDateTime;
 import java.util.List;

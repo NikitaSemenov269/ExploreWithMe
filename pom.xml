@@ -13,6 +13,7 @@
     <name>Explore With Me</name>
 
     <modules>
+        <module>common</module>
         <module>ewm</module>
         <module>stats</module>
         <module>rest-service-gateway</module>
