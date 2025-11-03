@@ -1,5 +1,6 @@
 package ru.practicum.category.services;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,13 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class PublicCategoryServiceImpl implements PublicCategoryService {
 
     private final CategoryRepository categoryRepository;
+
+    public PublicCategoryServiceImpl(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
 
     public Category findById(Long catId) {
         return categoryRepository.findById(catId)

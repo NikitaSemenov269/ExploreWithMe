@@ -17,18 +17,12 @@ public interface CategoryMapper {
 
     CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
-    @Mapping(source = "name", target = "name")
     Category toEntity(NewCategoryDto newCategoryDto);
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
     CategoryDto toDto(Category category);
 
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "name", source = "name")
     Category toEntity(CategoryDto categoryDto);
 
-    @Mapping(target = "name", source = "name")
     Category updateFromNewCategoryDto(NewCategoryDto newCategoryDto, @MappingTarget Category category);
 
     List<CategoryDto> toDtoList(List<Category> categories);
