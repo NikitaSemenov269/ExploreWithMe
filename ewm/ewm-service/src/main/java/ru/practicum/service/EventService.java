@@ -15,6 +15,7 @@ import ru.practicum.dto.event.*;
 import ru.practicum.enumeration.EventSort;
 import ru.practicum.enumeration.EventState;
 import ru.practicum.enumeration.StateAction;
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
@@ -69,6 +70,11 @@ public class EventService {
             Integer from,
             Integer size,
             HttpServletRequest request) {
+
+        // Валидация: rangeEnd должен быть позже rangeStart
+        if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new BadRequestException("Дата окончания не может быть раньше даты начала");
+        }
 
         BooleanBuilder predicate = new BooleanBuilder();
 
@@ -238,7 +244,7 @@ public class EventService {
 
         // Валидация: дата события должна быть не раньше чем через 2 часа
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(MIN_HOURS_BEFORE_EVENT))) {
-            throw new ConflictException("Дата события должна быть не раньше чем через " +
+            throw new BadRequestException("Дата события должна быть не раньше чем через " +
                     MIN_HOURS_BEFORE_EVENT + " часа от текущего момента");
         }
 
@@ -297,7 +303,7 @@ public class EventService {
         // Валидация даты
         if (updateRequest.getEventDate() != null &&
                 updateRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(MIN_HOURS_BEFORE_EVENT))) {
-            throw new ConflictException("Дата события должна быть не раньше чем через " +
+            throw new BadRequestException("Дата события должна быть не раньше чем через " +
                     MIN_HOURS_BEFORE_EVENT + " часа от текущего момента");
         }
 
@@ -386,7 +392,7 @@ public class EventService {
         // Валидация даты: должна быть не ранее чем за час от даты публикации
         if (updateRequest.getEventDate() != null) {
             if (updateRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
-                throw new ConflictException("Дата начала события должна быть не ранее чем за час от даты публикации");
+                throw new BadRequestException("Дата начала события должна быть не ранее чем за час от даты публикации");
             }
         }
 

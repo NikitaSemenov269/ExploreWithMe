@@ -1,5 +1,6 @@
 package ru.practicum.handler;
 
+import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.DataIntegrityException;
 import ru.practicum.exception.NotFoundException;
@@ -69,6 +70,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.name(),
                 "Missing required parameter",
                 "Required parameter '" + e.getParameterName() + "' is not present"
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e) {
+        log.warn("Bad request: {}", e.getMessage());
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request",
+                e.getMessage()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
