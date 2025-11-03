@@ -28,7 +28,7 @@ services:
       retries: 10
 
   ewm-service:
-    build: ./ewm-service
+    build: ./ewm/ewm-service
     ports:
       - "8080:8080"
     depends_on:

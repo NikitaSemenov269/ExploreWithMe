@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.practicum</groupId>
-        <artifactId>explore-with-me</artifactId>
+        <artifactId>ewm</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
@@ -56,6 +56,11 @@
         </dependency>
 
         <!-- Наши модули -->
+        <dependency>
+            <groupId>ru.practicum</groupId>
+            <artifactId>ewm-dto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>ru.practicum</groupId>
             <artifactId>stats-dto</artifactId>
