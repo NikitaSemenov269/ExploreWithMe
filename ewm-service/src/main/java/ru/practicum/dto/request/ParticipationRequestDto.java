@@ -7,7 +7,7 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestDto {
+public class ParticipationRequestDto {
     private Long id;
     private Long userId;
     private Long eventId;

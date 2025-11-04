@@ -1,0 +1,44 @@
+package ru.practicum.request.controller;
+
+import jakarta.validation.constraints.NotNull;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.request.service.ParticipationRequestService;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/users/{userId}/requests")
+public class PrivateParticipationRequestController {
+    private final ParticipationRequestService service;
+
+    public PrivateParticipationRequestController(ParticipationRequestService service) {
+        this.service = service;
+    }
+
+    @PostMapping()
+    public ResponseEntity<ParticipationRequestDto> addRequest(
+            @PathVariable @NotNull Long userId,
+            @RequestParam @NotNull Long eventId) {
+            ParticipationRequestDto dto = service.addRequest(userId, eventId);
+            return ResponseEntity.status(201).body(dto);
+    }
+
+    @PatchMapping("/{requestId}/cancel")
+    public ResponseEntity<ParticipationRequestDto> cancelRequest(
+            @PathVariable @NotNull Long userId,
+            @PathVariable @NotNull Long requestId) {
+            ParticipationRequestDto dto = service.cancelRequest(userId, requestId);
+            return ResponseEntity.ok(dto);
+
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ParticipationRequestDto>> getUserRequests(
+            @PathVariable @NotNull Long userId) {
+            List<ParticipationRequestDto> dtos = service.getUserRequests(userId);
+            return ResponseEntity.ok(dtos);
+    }
+
+}
