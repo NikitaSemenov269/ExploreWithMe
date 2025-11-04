@@ -9,12 +9,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>stats</artifactId>
+    <artifactId>ewm</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>stats-dto</module>
-        <module>stats-service</module>
+        <module>ewm-dto</module>
+        <module>ewm-service</module>
     </modules>
 
     <properties>
