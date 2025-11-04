@@ -129,7 +129,7 @@
                             <version>${org.mapstruct.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+                    <!-- <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory> -->
                 </configuration>
             </plugin>
         </plugins>

@@ -27,7 +27,6 @@ public class AdminCategoryServiceImpl implements AdminCategoryService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CategoryDto save(NewCategoryDto request) {
         Category category = CategoryMapper.INSTANCE.toEntity(request);
         try {
