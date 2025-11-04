@@ -19,7 +19,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class ParticipationRequestService {
 
-    private final ParticipationRequestMapper mapper;
     private final ParticipationRequestRepository requestRepository;
 
     @Transactional
@@ -30,7 +29,7 @@ public class ParticipationRequestService {
         request.setStatus(ParticipationStatus.PENDING);
         request.setCreated(LocalDateTime.now());
         ParticipationRequest savedRequest = requestRepository.save(request);
-        return mapper.toDto(savedRequest);
+        return ParticipationRequestMapper.INSTANCE.toDto(savedRequest);
     }
 
     @Transactional
@@ -39,13 +38,13 @@ public class ParticipationRequestService {
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         request.setStatus(ParticipationStatus.CANCELED);
         ParticipationRequest savedRequest = requestRepository.save(request);
-        return mapper.toDto(savedRequest);
+        return ParticipationRequestMapper.INSTANCE.toDto(savedRequest);
     }
 
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         List<ParticipationRequest> requests = requestRepository.findAllByUserId(userId);
         return requests.stream()
-                .map(mapper::toDto)
+                .map(ParticipationRequestMapper.INSTANCE::toDto)
                 .toList();
     }
 }
