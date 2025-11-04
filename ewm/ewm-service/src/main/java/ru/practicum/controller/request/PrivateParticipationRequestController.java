@@ -1,10 +1,10 @@
-package ru.practicum.request.controller;
+package ru.practicum.controller.request;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.ParticipationRequestDto;
-import ru.practicum.request.service.ParticipationRequestService;
+import ru.practicum.service.ParticipationRequestService;
 
 import java.util.List;
 

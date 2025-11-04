@@ -1,4 +1,4 @@
-package ru.practicum.request.service;
+package ru.practicum.service;
 
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enumeration.ParticipationStatus;
-import ru.practicum.request.ParticipationRequest;
-import ru.practicum.request.mapper.ParticipationRequestMapper;
-import ru.practicum.request.repository.ParticipationRequestRepository;
+import ru.practicum.mapper.ParticipationRequestMapper;
+import ru.practicum.model.ParticipationRequest;
+import ru.practicum.repository.ParticipationRequestRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
