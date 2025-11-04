@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enumeration.ParticipationStatus;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.ParticipationRequestMapper;
 import ru.practicum.model.Event;
@@ -41,6 +42,19 @@ public class ParticipationRequestService {
                     log.warn("Event with ID {} not found", eventId);
                     return new NotFoundException("Event with id: " + eventId + "was not found");
                 });
+        if (eventRepository.isInitiator(eventId, userId)) {
+            throw new ConflictException("User cannot request participation in their own event");
+        }
+        if (!eventRepository.isPublished(eventId)) {
+            throw new ConflictException("Cannot participate in an unpublished event");
+        }
+        Long requestCount = requestRepository.countByEventId(eventId);
+        if (requestCount >= eventRepository.getMaxRequestsLimit(eventId)) {
+            throw new ConflictException("Participation request limit reached for event id=" + eventId);
+        }
+        if (requestRepository.findByUserIdAndEventId(userId, eventId).isPresent()) {
+            throw new ConflictException("Duplicate participation request");
+        }
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(requester);
         request.setEvent(event);

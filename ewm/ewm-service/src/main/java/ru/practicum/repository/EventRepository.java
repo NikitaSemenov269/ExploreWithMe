@@ -10,4 +10,9 @@ import ru.practicum.model.Event;
  */
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
+    Long getMaxRequestsLimit(Long eventId);
+
+    boolean isPublished(Long eventId);
+
+    boolean isInitiator(Long eventId, Long userId);
 }
