@@ -83,7 +83,7 @@ public class ParticipationRequestService {
         if (!request.getRequester().getId().equals(requester.getId())) {
             throw new NotFoundException("Request with id=" + requestId + " does not belong to user " + userId);
         }
-        request.setStatus(ParticipationStatus.CANCELED);
+        request.setStatus(ParticipationStatus.CONFIRMED);
         ParticipationRequest savedRequest = requestRepository.save(request);
         log.info("The request: {} was successfully rejected", savedRequest);
         return ParticipationRequestMapper.INSTANCE.toDto(savedRequest);
@@ -96,7 +96,7 @@ public class ParticipationRequestService {
                     log.warn("User with ID {} not found", userId);
                     return new NotFoundException("User with id: " + userId + "was not found");
                 });
-        List<ParticipationRequestDto> requests = requestRepository.findAllRequesterId(existingUser.getId())
+        List<ParticipationRequestDto> requests = requestRepository.findAllByRequesterId(existingUser.getId())
                 .stream()
                 .map(ParticipationRequestMapper.INSTANCE::toDto)
                 .toList();
