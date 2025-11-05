@@ -1,0 +1,21 @@
+package ru.practicum.mapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import ru.practicum.dto.compilation.CompilationDto;
+import ru.practicum.dto.compilation.NewCompilationDto;
+import ru.practicum.model.Compilation;
+
+import java.util.List;
+
+@Mapper(componentModel = "spring")
+public interface CompilationMapper {
+
+    Compilation toEntity(NewCompilationDto newCompilationDto);
+
+    @Mapping(target = "events", ignore = true)
+    CompilationDto toDto(Compilation compilation);
+
+    List<CompilationDto> toCollectionDto(List<Compilation> compilations);
+
+}
