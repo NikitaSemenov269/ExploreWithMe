@@ -42,14 +42,15 @@ public class ParticipationRequestService {
                     log.warn("Event with ID {} not found", eventId);
                     return new NotFoundException("Event with id: " + eventId + "was not found");
                 });
-        if (eventRepository.isInitiator(eventId, userId)) {
+        if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("User cannot request participation in their own event");
         }
-        if (!eventRepository.isPublished(eventId)) {
+        if (event.getPublishedOn() == null || event.getPublishedOn().toString().trim().isEmpty()) {
             throw new ConflictException("Cannot participate in an unpublished event");
         }
-        Long requestCount = requestRepository.countByEventId(eventId);
-        if (requestCount >= eventRepository.getMaxRequestsLimit(eventId)) {
+        Integer requestCount = requestRepository.countByEventId(eventId);
+        Integer participantLimit = event.getParticipantLimit();
+        if (participantLimit > 0 && requestCount >= participantLimit) {
             throw new ConflictException("Participation request limit reached for event id=" + eventId);
         }
         if (requestRepository.findByUserIdAndEventId(userId, eventId).isPresent()) {
@@ -58,7 +59,11 @@ public class ParticipationRequestService {
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(requester);
         request.setEvent(event);
-        request.setStatus(ParticipationStatus.PENDING);
+        if (Boolean.TRUE.equals(event.getRequestModeration())) {
+            request.setStatus(ParticipationStatus.CONFIRMED);
+        } else {
+            request.setStatus(ParticipationStatus.PENDING);
+        }
         request.setCreated(LocalDateTime.now());
         ParticipationRequest savedRequest = requestRepository.save(request);
         log.info("The request was successfully created: {}", savedRequest);
