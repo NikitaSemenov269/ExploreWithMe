@@ -1,0 +1,65 @@
+-- Таблица пользователей
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(250) NOT NULL,
+    email VARCHAR(254) NOT NULL UNIQUE
+);
+
+-- Таблица категорий
+CREATE TABLE IF NOT EXISTS categories (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Таблица событий
+CREATE TABLE IF NOT EXISTS events (
+    id BIGSERIAL PRIMARY KEY,
+    annotation VARCHAR(2000) NOT NULL,
+    category_id BIGINT NOT NULL REFERENCES categories(id),
+    created_on TIMESTAMP NOT NULL,
+    description VARCHAR(7000) NOT NULL,
+    event_date TIMESTAMP NOT NULL,
+    initiator_id BIGINT NOT NULL REFERENCES users(id),
+    lat FLOAT NOT NULL,
+    lon FLOAT NOT NULL,
+    paid BOOLEAN NOT NULL,
+    participant_limit INTEGER NOT NULL,
+    published_on TIMESTAMP,
+    request_moderation BOOLEAN NOT NULL,
+    state VARCHAR(20) NOT NULL,
+    title VARCHAR(120) NOT NULL,
+    confirmed_requests INTEGER NOT NULL DEFAULT 0
+);
+
+-- Таблица заявок на участие
+CREATE TABLE IF NOT EXISTS participation_requests (
+    id BIGSERIAL PRIMARY KEY,
+    created TIMESTAMP NOT NULL,
+    event_id BIGINT NOT NULL REFERENCES events(id),
+    requester_id BIGINT NOT NULL REFERENCES users(id),
+    status VARCHAR(20) NOT NULL,
+    CONSTRAINT uq_participation_request UNIQUE (event_id, requester_id)
+);
+
+-- Таблица подборок
+CREATE TABLE IF NOT EXISTS compilations (
+    id BIGSERIAL PRIMARY KEY,
+    pinned BOOLEAN NOT NULL,
+    title VARCHAR(50) NOT NULL
+);
+
+-- Связь подборок и событий (many-to-many)
+CREATE TABLE IF NOT EXISTS compilation_events (
+    compilation_id BIGINT NOT NULL REFERENCES compilations(id) ON DELETE CASCADE,
+    event_id BIGINT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    PRIMARY KEY (compilation_id, event_id)
+);
+
+-- Индексы для оптимизации запросов
+CREATE INDEX IF NOT EXISTS idx_events_category_id ON events(category_id);
+CREATE INDEX IF NOT EXISTS idx_events_initiator_id ON events(initiator_id);
+CREATE INDEX IF NOT EXISTS idx_events_state ON events(state);
+CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
+CREATE INDEX IF NOT EXISTS idx_participation_requests_event_id ON participation_requests(event_id);
+CREATE INDEX IF NOT EXISTS idx_participation_requests_requester_id ON participation_requests(requester_id);
+CREATE INDEX IF NOT EXISTS idx_participation_requests_status ON participation_requests(status);
