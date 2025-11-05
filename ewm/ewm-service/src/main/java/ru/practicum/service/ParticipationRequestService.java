@@ -59,7 +59,7 @@ public class ParticipationRequestService {
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(requester);
         request.setEvent(event);
-        if (Boolean.TRUE.equals(event.getRequestModeration())) {
+        if (Boolean.FALSE.equals(event.getRequestModeration())) {
             request.setStatus(ParticipationStatus.CONFIRMED);
         } else {
             request.setStatus(ParticipationStatus.PENDING);
@@ -83,7 +83,7 @@ public class ParticipationRequestService {
         if (!request.getRequester().getId().equals(requester.getId())) {
             throw new NotFoundException("Request with id=" + requestId + " does not belong to user " + userId);
         }
-        request.setStatus(ParticipationStatus.CONFIRMED);
+        request.setStatus(ParticipationStatus.CANCELED);
         ParticipationRequest savedRequest = requestRepository.save(request);
         log.info("The request: {} was successfully rejected", savedRequest);
         return ParticipationRequestMapper.INSTANCE.toDto(savedRequest);
