@@ -53,7 +53,7 @@ public class ParticipationRequestService {
         if (participantLimit > 0 && requestCount >= participantLimit) {
             throw new ConflictException("Participation request limit reached for event id=" + eventId);
         }
-        if (requestRepository.findByUserIdAndEventId(userId, eventId).isPresent()) {
+        if (requestRepository.findByRequesterIdAndEventId(userId, eventId).isPresent()) {
             throw new ConflictException("Duplicate participation request");
         }
         ParticipationRequest request = new ParticipationRequest();
@@ -96,7 +96,7 @@ public class ParticipationRequestService {
                     log.warn("User with ID {} not found", userId);
                     return new NotFoundException("User with id: " + userId + "was not found");
                 });
-        List<ParticipationRequestDto> requests = requestRepository.findAllByUserId(existingUser.getId())
+        List<ParticipationRequestDto> requests = requestRepository.findAllRequesterId(existingUser.getId())
                 .stream()
                 .map(ParticipationRequestMapper.INSTANCE::toDto)
                 .toList();
