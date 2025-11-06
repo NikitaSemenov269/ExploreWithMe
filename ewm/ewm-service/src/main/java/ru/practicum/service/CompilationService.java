@@ -22,7 +22,6 @@ import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
 
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -134,6 +133,7 @@ public class CompilationService {
         }
 
         List<EventShortDto> eventDtos = null;
+
         if (updReqCompDto.getEvents() != null) {
             if (!updReqCompDto.getEvents().isEmpty()) {
                 Set<Long> eventsId = compilation.getEvents().stream()
@@ -159,7 +159,7 @@ public class CompilationService {
             if (eventDtos != null) compilationDto.setEvents(eventDtos);
             return compilationDto;
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Ошибка при сохранении обновленной категории.");
+            throw new ConflictException("Ошибка при сохранении обновленной категории с ID: " + id);
         }
     }
 }
