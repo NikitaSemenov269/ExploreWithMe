@@ -10,6 +10,7 @@ import ru.practicum.model.Compilation;
 public interface CompilationMapper {
 
     @Mapping(target = "events", ignore = true)
+    @Mapping(target = "pinned", source = "pinned", defaultExpression = "java(false)")
     Compilation toEntity(NewCompilationDto newCompilationDto);
 
     @Mapping(target = "events", ignore = true)
