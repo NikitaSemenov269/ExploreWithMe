@@ -109,11 +109,11 @@ public class CompilationService {
         compilation.setEvents(events);
 
         try {
-            compRep.save(compilation);
+            Compilation savedCompilation = compRep.save(compilation);
 
-            CompilationDto compilationDto = mapper.toDto(compilation);
+            CompilationDto compilationDto = mapper.toDto(savedCompilation);
 
-            List<EventShortDto> eventShortDtos = events.stream()
+            List<EventShortDto> eventShortDtos = savedCompilation.getEvents().stream()
                     .map(eventMapper::toShortDto)
                     .collect(Collectors.toList());
 
