@@ -1,17 +1,20 @@
 package ru.practicum.controller.event;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
+import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.service.EventService;
 
 import java.util.List;
@@ -99,5 +102,14 @@ public class PrivateEventController {
         log.info("PATCH /users/{}/events/{}: updateRequest={}", userId, eventId, updateRequest);
 
         return eventService.updateUserEvent(userId, eventId, updateRequest);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public ResponseEntity<List<ParticipationRequestDto>> getEventParticipants(
+            @PathVariable @NotNull Long userId,
+            @PathVariable @NotNull Long eventId) {
+
+        List<ParticipationRequestDto> dtos = eventService.getEventParticipantRequests(userId, eventId);
+        return ResponseEntity.ok(dtos);
     }
 }

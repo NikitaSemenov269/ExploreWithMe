@@ -12,6 +12,7 @@ import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
 import ru.practicum.StatsClient;
 import ru.practicum.dto.event.*;
+import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enumeration.EventSort;
 import ru.practicum.enumeration.EventState;
 import ru.practicum.enumeration.StateAction;
@@ -19,12 +20,11 @@ import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Event;
-import ru.practicum.model.QEvent;
-import ru.practicum.model.User;
+import ru.practicum.mapper.ParticipationRequestMapper;
+import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.repository.ParticipationRequestRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.util.UriUtils;
 
@@ -51,6 +51,7 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
     private final StatsClient statsClient;
+    private final ParticipationRequestRepository requestRepository;
 
     private static final int MIN_HOURS_BEFORE_EVENT = 2;
     private static final String APP_NAME = "ewm-service";
@@ -426,5 +427,24 @@ public class EventService {
         log.info("Администратор обновил событие с ID: {}", eventId);
 
         return eventMapper.toFullDto(event);
+    }
+
+    public List<ParticipationRequestDto> getEventParticipantRequests(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> {
+                    log.warn("Event with ID {} not found", eventId);
+                    return new NotFoundException("Event with id: " + eventId + "was not found");
+                });
+        User eventOwner = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("User with ID {} not found", userId);
+                    return new NotFoundException("User with id: " + userId + "was not found");
+                });
+        if (!event.getInitiator().getId().equals(eventOwner.getId())) {
+            throw new ConflictException("User with id = "+ userId +" is not event initiator");
+        }
+        List<ParticipationRequest> requests = requestRepository.findAllByEventId(eventId);
+        return requests.stream()
+                .map(ParticipationRequestMapper.INSTANCE::toDto).toList();
     }
 }
