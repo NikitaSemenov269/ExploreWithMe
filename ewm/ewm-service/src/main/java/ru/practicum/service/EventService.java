@@ -441,7 +441,7 @@ public class EventService {
                     return new NotFoundException("User with id: " + userId + "was not found");
                 });
         if (!event.getInitiator().getId().equals(eventOwner.getId())) {
-            throw new ConflictException("User with id = "+ userId +" is not event initiator");
+            throw new ConflictException("User with id = " + userId + " is not event initiator");
         }
         List<ParticipationRequest> requests = requestRepository.findAllByEventId(eventId);
         return requests.stream()
