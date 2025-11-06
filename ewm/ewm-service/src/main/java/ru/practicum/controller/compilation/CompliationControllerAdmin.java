@@ -19,7 +19,7 @@ public class CompliationControllerAdmin {
     private final CompilationService compServ;
 
     @PostMapping
-    public ResponseEntity<Void> saveCompilation(
+    public ResponseEntity<CompilationDto> saveCompilation(
             @Valid @RequestBody NewCompilationDto newCompilationDto) {
         compServ.saveCompilation(newCompilationDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();

@@ -99,7 +99,7 @@ public class CompilationService {
     /**
      * Сохранение подборки
      */
-    public void saveCompilation(NewCompilationDto newCompilationDto) {
+    public CompilationDto saveCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = mapper.toEntity(newCompilationDto);
 
         Set<Event> events = new HashSet<>(queryFactory.selectFrom(event)
@@ -107,9 +107,18 @@ public class CompilationService {
                 .fetch());
 
         compilation.setEvents(events);
+
+        CompilationDto compilationDto = mapper.toDto(compilation);
+
+        List<EventShortDto> eventShortDtos = events.stream()
+                .map(eventMapper::toShortDto)
+                .collect(Collectors.toList());
+        compilationDto.setEvents(eventShortDtos);
+
         try {
             compRep.save(compilation);
             log.info("Сохранена новая подборка.");
+            return compilationDto;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Ошибка при сохранении новой подборки.");
         }
