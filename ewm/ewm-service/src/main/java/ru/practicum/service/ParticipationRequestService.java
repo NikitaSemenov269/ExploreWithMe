@@ -59,7 +59,7 @@ public class ParticipationRequestService {
         ParticipationRequest request = new ParticipationRequest();
         request.setRequester(requester);
         request.setEvent(event);
-        if (Boolean.FALSE.equals(event.getRequestModeration())) {
+        if (Boolean.FALSE.equals(event.getRequestModeration()) || participantLimit == 0) {
             request.setStatus(ParticipationStatus.CONFIRMED);
         } else {
             request.setStatus(ParticipationStatus.PENDING);
