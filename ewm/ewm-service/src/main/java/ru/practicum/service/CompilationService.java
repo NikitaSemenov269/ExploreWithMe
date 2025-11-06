@@ -1,7 +1,10 @@
 package ru.practicum.service;
 
-import lombok.AllArgsConstructor;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,50 +12,106 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.UpdateCompilationRequest;
+import ru.practicum.dto.event.EventShortDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.CompilationMapper;
+import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Compilation;
+import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.repository.EventRepository;
 
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static ru.practicum.model.QCompilation.compilation;
+import static ru.practicum.model.QEvent.event;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Transactional
 public class CompilationService {
     private final CompilationRepository compRep;
-    private final EventRepository eventRepo;
+    private final EventRepository eventRep;
     private final CompilationMapper mapper;
+    private final EventMapper eventMapper;
+    private final JPAQueryFactory queryFactory;
 
-    // ЛОГИ ЛОГИ ЛОГИ ЛОГИ
-
+    /**
+     * Получение списка подборок с возможностью фильтрации по статусу закрепления
+     */
     @Transactional(readOnly = true)
     public List<CompilationDto> findCompilations(Boolean pinned, Pageable pageable) {
-        // валидация
-        return compRep.findCompilations(pinned, pageable);
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        if (pinned == null) pinned = false;
+        predicate.and(compilation.pinned.eq(pinned));
+
+        List<Long> compilationIds = queryFactory
+                .select(compilation.id)
+                .from(compilation)
+                .where(predicate)
+                .orderBy(compilation.id.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (compilationIds.isEmpty()) {
+            log.info("Нет подборок с статусом закрепления ={}", pinned);
+            return Collections.emptyList();
+        }
+
+        List<CompilationDto> compilationDtos = queryFactory
+                .selectFrom(compilation)
+                .leftJoin(compilation.events, event).fetchJoin()
+                .where(compilation.id.in(compilationIds))
+                .orderBy(compilation.id.asc())
+                .fetch()
+                .stream()
+                .map(comp -> {
+                    CompilationDto dto = mapper.toDto(comp);
+                    dto.setEvents(comp.getEvents().stream()
+                            .map(eventMapper::toShortDto)
+                            .collect(Collectors.toList()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        log.info("Получен список подборок событий размером: {}", compilationDtos.size());
+        return compilationDtos;
     }
 
+    /**
+     * Поиск подборки по ID
+     */
     @Transactional(readOnly = true)
     public CompilationDto findCompilationById(Long compId) {
-        // валидация
-        return compRep.findCompilationById(compId).orElseThrow(() -> new NotFoundException("GG"));
+
+        Compilation compilation = compRep.findById(compId).orElseThrow(
+                () -> new NotFoundException("Подборка с ID: " + compId + " не найдена."));
+
+        log.info("Найдена подборка с ID: {}", compId);
+        return mapper.toDto(compilation);
     }
 
+    /**
+     * Сохранение подборки
+     */
     public void saveCompilation(NewCompilationDto newCompilationDto) {
-
         try {
             compRep.save(mapper.toEntity(newCompilationDto));
-            // исключения из прошлого проекта
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Ошибка при сохранении новой категории.");
         }
     }
 
+    /**
+     * Удаление подборки по ID
+     */
     public void deleteCompilation(Long compId) {
-        // валидация
         try {
             compRep.deleteById(compId);
         } catch (Exception e) {
@@ -60,10 +119,12 @@ public class CompilationService {
         }
     }
 
+    /**
+     * Обновление подборки по ID
+     */
     public CompilationDto updateCompilation(Long id, UpdateCompilationRequest updReqCompDto) {
-        // валидация
         Compilation compilation = compRep.findById(id)
-                .orElseThrow(() -> new NotFoundException("GG"));
+                .orElseThrow(() -> new NotFoundException("Подборка с ID: " + id + " не найдена."));
 
         if (updReqCompDto.getPinned() != null && !compilation.getPinned().equals(updReqCompDto.getPinned())) {
             compilation.setPinned(updReqCompDto.getPinned());
@@ -71,15 +132,34 @@ public class CompilationService {
         if (updReqCompDto.getTitle() != null && !compilation.getTitle().equals(updReqCompDto.getTitle())) {
             compilation.setTitle(updReqCompDto.getTitle());
         }
-        if (updReqCompDto.getEventsId() != null && !compilation.getEventsId().equals(updReqCompDto.getEventsId())) {
-            compilation.setEventsId(updReqCompDto.getEventsId());
-        }
 
+        List<EventShortDto> eventDtos = null;
+        if (updReqCompDto.getEvents() != null) {
+            if (!updReqCompDto.getEvents().isEmpty()) {
+                Set<Long> eventsId = compilation.getEvents().stream()
+                        .map(Event::getId)
+                        .collect(Collectors.toSet());
+
+                boolean allPresent = new HashSet<>(eventsId).containsAll(updReqCompDto.getEvents());
+
+                if (!allPresent) {
+                    Set<Event> events = new HashSet<>(eventRep.findAllById(updReqCompDto.getEvents()));
+                    compilation.setEvents(events);
+                    eventDtos = events.stream()
+                            .map(eventMapper::toShortDto)
+                            .collect(Collectors.toList());
+                }
+            } else {
+                compilation.setEvents(Collections.emptySet());
+            }
+        }
         try {
             compRep.save(compilation);
-            return mapper.toDto(compilation);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            CompilationDto compilationDto = mapper.toDto(compilation);
+            if (eventDtos != null) compilationDto.setEvents(eventDtos);
+            return compilationDto;
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Ошибка при сохранении обновленной категории.");
         }
     }
 }
