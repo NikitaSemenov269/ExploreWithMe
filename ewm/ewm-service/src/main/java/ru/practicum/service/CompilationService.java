@@ -119,7 +119,7 @@ public class CompilationService {
 
             compilationDto.setEvents(eventShortDtos);
 
-            log.info("Сохранена новая подборка с ID: {}", compilation.getId());
+            log.info("Сохранена новая подборка с ID: {}", savedCompilation.getId());
             return compilationDto;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Ошибка при сохранении новой подборки.");

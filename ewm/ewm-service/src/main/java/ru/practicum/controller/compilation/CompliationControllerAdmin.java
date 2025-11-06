@@ -21,8 +21,7 @@ public class CompliationControllerAdmin {
     @PostMapping
     public ResponseEntity<CompilationDto> saveCompilation(
             @Valid @RequestBody NewCompilationDto newCompilationDto) {
-        compServ.saveCompilation(newCompilationDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(compServ.saveCompilation(newCompilationDto));
     }
 
     @DeleteMapping("/{compId}")
