@@ -111,7 +111,7 @@ public class CompilationService {
             compRep.save(compilation);
             log.info("Сохранена новая подборка.");
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Ошибка при сохранении новой категории.");
+            throw new ConflictException("Ошибка при сохранении новой подборки.");
         }
     }
 
