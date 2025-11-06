@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.service.CompilationService;
@@ -31,7 +32,7 @@ public class CompliationControllerAdmin {
     }
 
     @PatchMapping("/{compId}")
-    public ResponseEntity<NewCompilationDto> updateCompilation(
+    public ResponseEntity<CompilationDto> updateCompilation(
             @PathVariable @Min(1) Long compId,
             @RequestBody UpdateCompilationRequest updRequestCompilationDto) {
         return ResponseEntity.ok().body(compServ.updateCompilation(compId, updRequestCompilationDto));
