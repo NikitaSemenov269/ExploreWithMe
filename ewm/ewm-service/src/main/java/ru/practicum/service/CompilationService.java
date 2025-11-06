@@ -100,8 +100,16 @@ public class CompilationService {
      * Сохранение подборки
      */
     public void saveCompilation(NewCompilationDto newCompilationDto) {
+        Compilation compilation = mapper.toEntity(newCompilationDto);
+
+        Set<Event> events = new HashSet<>(queryFactory.selectFrom(event)
+                .where(event.id.in(newCompilationDto.getEvents()))
+                .fetch());
+
+        compilation.setEvents(events);
         try {
-            compRep.save(mapper.toEntity(newCompilationDto));
+            compRep.save(compilation);
+            log.info("Сохранена новая подборка.");
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Ошибка при сохранении новой категории.");
         }
@@ -113,6 +121,7 @@ public class CompilationService {
     public void deleteCompilation(Long compId) {
         try {
             compRep.deleteById(compId);
+            log.info("Подборка с ID: {} удалена.", compId);
         } catch (Exception e) {
             throw new RuntimeException("");
         }
@@ -157,6 +166,7 @@ public class CompilationService {
             compRep.save(compilation);
             CompilationDto compilationDto = mapper.toDto(compilation);
             if (eventDtos != null) compilationDto.setEvents(eventDtos);
+            log.info("Подборка с ID: {} успешно обновлена.", id);
             return compilationDto;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Ошибка при сохранении обновленной категории с ID: " + id);
