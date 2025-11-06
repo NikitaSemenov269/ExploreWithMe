@@ -108,16 +108,18 @@ public class CompilationService {
 
         compilation.setEvents(events);
 
-        CompilationDto compilationDto = mapper.toDto(compilation);
-
-        List<EventShortDto> eventShortDtos = events.stream()
-                .map(eventMapper::toShortDto)
-                .collect(Collectors.toList());
-        compilationDto.setEvents(eventShortDtos);
-
         try {
             compRep.save(compilation);
-            log.info("Сохранена новая подборка.");
+
+            CompilationDto compilationDto = mapper.toDto(compilation);
+
+            List<EventShortDto> eventShortDtos = events.stream()
+                    .map(eventMapper::toShortDto)
+                    .collect(Collectors.toList());
+
+            compilationDto.setEvents(eventShortDtos);
+
+            log.info("Сохранена новая подборка с ID: {}", compilation.getId());
             return compilationDto;
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("Ошибка при сохранении новой подборки.");
