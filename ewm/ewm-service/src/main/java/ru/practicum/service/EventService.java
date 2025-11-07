@@ -483,9 +483,12 @@ public class EventService {
         }
 
         // 7. Обновляем статус выбранных заявок (статус заявок ParticipationStatus.PENDING проверен в п.5)
-
         List<ParticipationRequest> rejectedDueToLimit = new ArrayList<>();
-        long currentConfirmed = confirmedCount + requestIds.size();
+        long currentConfirmed = confirmedCount;
+
+        if (request.getStatus() == ParticipationStatus.CONFIRMED) {
+            currentConfirmed += requestIds.size();
+        }
 
         // 8. Смотрим сколько заявок можно добавить. Если лимит исчерпан — отклоняем остальные PENDING заявки
         if (currentConfirmed >= maxLimit) {
@@ -498,9 +501,13 @@ public class EventService {
             List<ParticipationRequest> allPendingRequests = requestRepository
                     .findAllByEventIdAndStatus(eventId, ParticipationStatus.PENDING);
 
-            if (!allPendingRequests.isEmpty()) {
+            List<ParticipationRequest> remainingPending = allPendingRequests.stream()
+                    .filter(r -> !requestIds.contains(r.getId()))
+                    .collect(Collectors.toList());
+
+            if (!remainingPending.isEmpty()) {
                 requestRepository.rejectAllPendingRequests(eventId, ParticipationStatus.REJECTED);
-                rejectedDueToLimit.addAll(allPendingRequests);
+                rejectedDueToLimit.addAll(remainingPending);
             }
         } else {
             requestRepository.bulkUpdateStatus(eventId, requestIds, request.getStatus());
