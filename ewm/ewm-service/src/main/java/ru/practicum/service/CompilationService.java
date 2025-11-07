@@ -101,16 +101,13 @@ public class CompilationService {
      */
     public CompilationDto saveCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = mapper.toEntity(newCompilationDto);
-
         Set<Event> events = new HashSet<>(queryFactory.selectFrom(event)
                 .where(event.id.in(newCompilationDto.getEvents()))
                 .fetch());
 
         compilation.setEvents(events);
-
         try {
             Compilation savedCompilation = compRep.save(compilation);
-
             CompilationDto compilationDto = mapper.toDto(savedCompilation);
 
             List<EventShortDto> eventShortDtos = savedCompilation.getEvents().stream()
@@ -118,7 +115,6 @@ public class CompilationService {
                     .collect(Collectors.toList());
 
             compilationDto.setEvents(eventShortDtos);
-
             log.info("Сохранена новая подборка с ID: {}", savedCompilation.getId());
             return compilationDto;
         } catch (DataIntegrityViolationException e) {

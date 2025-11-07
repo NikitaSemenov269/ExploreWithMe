@@ -1,6 +1,7 @@
 package ru.practicum.controller.event;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,7 @@ public class PublicEventController {
      */
     @GetMapping("/{id}")
     public EventFullDto getEventById(
-            @PathVariable Long id,
+            @PathVariable @Min(1) Long id,
             HttpServletRequest request) {
 
         log.info("GET /events/{}: id={}", id, id);

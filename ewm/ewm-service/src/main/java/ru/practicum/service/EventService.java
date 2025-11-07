@@ -12,28 +12,28 @@ import ru.practicum.DTO.RequestStatisticDto;
 import ru.practicum.DTO.ResponseStatisticDto;
 import ru.practicum.StatsClient;
 import ru.practicum.dto.event.*;
+import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.enumeration.EventSort;
 import ru.practicum.enumeration.EventState;
+import ru.practicum.enumeration.ParticipationStatus;
 import ru.practicum.enumeration.StateAction;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.mapper.EventMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Event;
-import ru.practicum.model.QEvent;
-import ru.practicum.model.User;
+import ru.practicum.mapper.ParticipationRequestMapper;
+import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
+import ru.practicum.repository.ParticipationRequestRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.util.UriUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -51,6 +51,7 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
     private final StatsClient statsClient;
+    private final ParticipationRequestRepository requestRepository;
 
     private static final int MIN_HOURS_BEFORE_EVENT = 2;
     private static final String APP_NAME = "ewm-service";
@@ -426,5 +427,105 @@ public class EventService {
         log.info("Администратор обновил событие с ID: {}", eventId);
 
         return eventMapper.toFullDto(event);
+    }
+
+
+    @Transactional
+    public EventRequestStatusUpdateResult updateRequestsStatus(
+            Long userId, Long eventId, EventRequestStatusUpdateRequest request) {
+        // Статус можно изменить только у заявок, находящихся в состоянии ожидания
+        if (request.getStatus() == ParticipationStatus.PENDING) {
+            throw new ConflictException("Данный статус уже установлен для заявок с ID: " + request.getRequestIds());
+        }
+
+        List<Long> requestIds = request.getRequestIds();
+
+        // 1. Проверяем существование события
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId));
+
+        // 2. Проверяем пре‑модерацию и лимит
+        boolean preModeration = event.getRequestModeration();
+        int maxLimit = event.getParticipantLimit();
+
+        if (maxLimit == 0 || !preModeration) {
+            throw new ConflictException(
+                    "Pre-moderation is disabled or limit is 0, no status change needed");
+        }
+
+        // 3. Проверяем, что пользователь — инициатор события
+        if (!userId.equals(event.getInitiator().getId())) {
+            throw new ConflictException("User is not event initiator");
+        }
+
+        // 4. Получаем заявки для обновления
+        List<ParticipationRequest> requests = requestRepository.findAllByEventIdAndIdIn(
+                eventId, requestIds);
+
+        if (requests.isEmpty()) {
+            throw new NotFoundException("No requests found for the given IDs");
+        }
+
+        // 5. Проверяем, что все заявки в статусе PENDING
+        for (ParticipationRequest req : requests) {
+            if (req.getStatus() != ParticipationStatus.PENDING) {
+                throw new ConflictException(
+                        "Request " + req.getId() + " is not in PENDING status");
+            }
+        }
+
+        // 6. Проверяем лимит подтверждённых заявок
+        long confirmedCount = requestRepository.countByEventIdAndStatus(
+                eventId, ParticipationStatus.CONFIRMED);
+
+        if (confirmedCount >= maxLimit) {
+            throw new ConflictException("Participant limit reached");
+        }
+
+        // 7. Обновляем статус выбранных заявок (статус заявок ParticipationStatus.PENDING проверен в п.5)
+        long currentConfirmed = confirmedCount + requestIds.size();
+
+        List<ParticipationRequest> rejectedDueToLimit = new ArrayList<>();
+
+        // 8. Если лимит исчерпан — отклоняем остальные PENDING заявки
+        if (currentConfirmed >= maxLimit) {
+            long canConfirm = maxLimit - confirmedCount;
+            // Нет смысла обновлять запросы для 0 заявок
+            if (canConfirm > 0) {
+                List<Long> requestIdsPart = requestIds.stream().limit(canConfirm).collect(Collectors.toList());
+                requestRepository.bulkUpdateStatus(eventId, requestIdsPart, request.getStatus());
+            }
+            // Сначала получаем все PENDING заявки
+            List<ParticipationRequest> allPendingRequests = requestRepository
+                    .findAllByEventIdAndStatus(eventId, ParticipationStatus.PENDING);
+
+            if (!allPendingRequests.isEmpty()) {
+                requestRepository.rejectAllPendingRequests(eventId, ParticipationStatus.REJECTED);
+                rejectedDueToLimit.addAll(allPendingRequests);
+            }
+        } else {
+            requestRepository.bulkUpdateStatus(eventId, requestIds, request.getStatus());
+        }
+
+        // 9. Формируем ответ
+        List<ParticipationRequest> updatedRequests = requestRepository.findAllByEventIdAndIdIn(
+                eventId, requestIds);
+
+        List<ParticipationRequestDto> confirmed = updatedRequests.stream()
+                .filter(r -> r.getStatus() == ParticipationStatus.CONFIRMED)
+                .map(ParticipationRequestMapper.INSTANCE::toDto).toList();
+
+        List<ParticipationRequestDto> rejected = new ArrayList<>(updatedRequests.stream()
+                .filter(r -> r.getStatus() == ParticipationStatus.REJECTED)
+                .map(ParticipationRequestMapper.INSTANCE::toDto).toList());
+
+        // Добавляем отклонённые из‑за лимита
+        rejected.addAll(rejectedDueToLimit.stream()
+                .map(ParticipationRequestMapper.INSTANCE::toDto).toList());
+
+        return EventRequestStatusUpdateResult.builder()
+                .confirmedRequests(confirmed)
+                .rejectedRequests(rejected)
+                .build();
     }
 }

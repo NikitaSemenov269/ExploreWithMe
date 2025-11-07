@@ -1,17 +1,21 @@
 package ru.practicum.controller.event;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
+import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.service.EventService;
 
 import java.util.List;
@@ -38,7 +42,7 @@ public class PrivateEventController {
      */
     @GetMapping
     public List<EventShortDto> getUserEvents(
-            @PathVariable Long userId,
+            @PathVariable @Min(1) Long userId,
             @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
             @RequestParam(defaultValue = "10") @Positive Integer size) {
 
@@ -57,7 +61,7 @@ public class PrivateEventController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addEvent(
-            @PathVariable Long userId,
+            @PathVariable @Min(1) Long userId,
             @Valid @RequestBody NewEventDto newEventDto) {
 
         log.info("POST /users/{}/events: newEventDto={}", userId, newEventDto);
@@ -74,8 +78,8 @@ public class PrivateEventController {
      */
     @GetMapping("/{eventId}")
     public EventFullDto getUserEventById(
-            @PathVariable Long userId,
-            @PathVariable Long eventId) {
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId) {
 
         log.info("GET /users/{}/events/{}", userId, eventId);
 
@@ -92,12 +96,22 @@ public class PrivateEventController {
      */
     @PatchMapping("/{eventId}")
     public EventFullDto updateUserEvent(
-            @PathVariable Long userId,
-            @PathVariable Long eventId,
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
             @Valid @RequestBody UpdateEventUserRequest updateRequest) {
 
         log.info("PATCH /users/{}/events/{}: updateRequest={}", userId, eventId, updateRequest);
 
         return eventService.updateUserEvent(userId, eventId, updateRequest);
+    }
+
+    @PatchMapping("/{eventId}/requests")
+    public ResponseEntity<EventRequestStatusUpdateResult> updateRequestsStatus(
+            @PathVariable @Min(1) Long userId,
+            @PathVariable @Min(1) Long eventId,
+            @Valid @RequestBody EventRequestStatusUpdateRequest request) {
+
+        EventRequestStatusUpdateResult result = eventService.updateRequestsStatus(userId, eventId, request);
+        return ResponseEntity.ok(result);
     }
 }
