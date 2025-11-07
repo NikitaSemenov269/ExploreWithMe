@@ -501,13 +501,9 @@ public class EventService {
             List<ParticipationRequest> allPendingRequests = requestRepository
                     .findAllByEventIdAndStatus(eventId, ParticipationStatus.PENDING);
 
-            List<ParticipationRequest> remainingPending = allPendingRequests.stream()
-                    .filter(r -> !requestIds.contains(r.getId()))
-                    .collect(Collectors.toList());
-
-            if (!remainingPending.isEmpty()) {
+            if (!allPendingRequests.isEmpty()) {
                 requestRepository.rejectAllPendingRequests(eventId, ParticipationStatus.REJECTED);
-                rejectedDueToLimit.addAll(remainingPending);
+                rejectedDueToLimit.addAll(allPendingRequests);
             }
         } else {
             requestRepository.bulkUpdateStatus(eventId, requestIds, request.getStatus());
@@ -516,6 +512,10 @@ public class EventService {
         // 9. Формируем ответ
         List<ParticipationRequest> updatedRequests = requestRepository.findAllByEventIdAndIdIn(
                 eventId, requestIds);
+        Set<Long> alreadyRejectedIds = updatedRequests.stream()
+                .filter(r -> r.getStatus() == ParticipationStatus.REJECTED)
+                .map(ParticipationRequest::getId)
+                .collect(Collectors.toSet());
 
         List<ParticipationRequestDto> confirmed = updatedRequests.stream()
                 .filter(r -> r.getStatus() == ParticipationStatus.CONFIRMED)
@@ -525,9 +525,10 @@ public class EventService {
                 .filter(r -> r.getStatus() == ParticipationStatus.REJECTED)
                 .map(ParticipationRequestMapper.INSTANCE::toDto).toList());
 
-        // Добавляем отклонённые из‑за лимита
         rejected.addAll(rejectedDueToLimit.stream()
-                .map(ParticipationRequestMapper.INSTANCE::toDto).toList());
+                .filter(r -> !alreadyRejectedIds.contains(r.getId()))
+                .map(ParticipationRequestMapper.INSTANCE::toDto)
+                .toList());
 
         return EventRequestStatusUpdateResult.builder()
                 .confirmedRequests(confirmed)
