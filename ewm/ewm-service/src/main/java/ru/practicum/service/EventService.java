@@ -483,11 +483,11 @@ public class EventService {
         }
 
         // 7. Обновляем статус выбранных заявок (статус заявок ParticipationStatus.PENDING проверен в п.5)
-        long currentConfirmed = confirmedCount + requestIds.size();
 
         List<ParticipationRequest> rejectedDueToLimit = new ArrayList<>();
+        long currentConfirmed = confirmedCount + requestIds.size();
 
-        // 8. Если лимит исчерпан — отклоняем остальные PENDING заявки
+        // 8. Смотрим сколько заявок можно добавить. Если лимит исчерпан — отклоняем остальные PENDING заявки
         if (currentConfirmed >= maxLimit) {
             long canConfirm = maxLimit - confirmedCount;
             // Нет смысла обновлять запросы для 0 заявок
