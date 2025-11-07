@@ -435,7 +435,7 @@ public class EventService {
             Long userId, Long eventId, EventRequestStatusUpdateRequest request) {
         // Статус можно изменить только у заявок, находящихся в состоянии ожидания
         if (request.getStatus() == ParticipationStatus.PENDING) {
-            throw new ConflictException("Данный статус уже установлен для заявок с ID: " + request.getRequestIds());
+            throw new ConflictException("Статус 'PENDING' не может быть установлен для заявок с ID: " + request.getRequestIds());
         }
 
         List<Long> requestIds = request.getRequestIds();
@@ -446,7 +446,7 @@ public class EventService {
 
         // 2. Проверяем пре‑модерацию и лимит
         boolean preModeration = event.getRequestModeration();
-        int maxLimit = event.getParticipantLimit();
+        long maxLimit = event.getParticipantLimit();
 
         if (maxLimit == 0 || !preModeration) {
             throw new ConflictException(
