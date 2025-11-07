@@ -27,7 +27,7 @@ public class CompliationControllerAdmin {
     @DeleteMapping("/{compId}")
     public ResponseEntity<Void> deleteCompilation(@PathVariable @Min(1) Long compId) {
         compServ.deleteCompilation(compId);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(204).build();
     }
 
     @PatchMapping("/{compId}")
