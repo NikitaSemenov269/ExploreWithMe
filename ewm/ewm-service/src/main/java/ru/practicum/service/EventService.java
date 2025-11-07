@@ -535,4 +535,23 @@ public class EventService {
                 .rejectedRequests(rejected)
                 .build();
     }
+
+    public List<ParticipationRequestDto> getEventParticipantRequests(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> {
+                    log.warn("Event with ID {} not found", eventId);
+                    return new NotFoundException("Event with id: " + eventId + "was not found");
+                });
+        User eventOwner = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.warn("User with ID {} not found", userId);
+                    return new NotFoundException("User with id: " + userId + "was not found");
+                });
+        if (!event.getInitiator().getId().equals(eventOwner.getId())) {
+            throw new ConflictException("User with id = "+ userId +" is not event initiator");
+        }
+        List<ParticipationRequest> requests = requestRepository.findAllByEventId(eventId);
+        return requests.stream()
+                .map(ParticipationRequestMapper.INSTANCE::toDto).toList();
+    }
 }

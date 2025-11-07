@@ -2,6 +2,7 @@ package ru.practicum.controller.event;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventUserRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.service.EventService;
 
 import java.util.List;
@@ -113,5 +115,14 @@ public class PrivateEventController {
 
         EventRequestStatusUpdateResult result = eventService.updateRequestsStatus(userId, eventId, request);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public ResponseEntity<List<ParticipationRequestDto>> getEventParticipants(
+            @PathVariable @NotNull Long userId,
+            @PathVariable @NotNull Long eventId) {
+
+        List<ParticipationRequestDto> dtos = eventService.getEventParticipantRequests(userId, eventId);
+        return ResponseEntity.ok(dtos);
     }
 }
