@@ -490,11 +490,10 @@ public class EventService {
         // 8. Смотрим сколько заявок можно добавить. Если лимит исчерпан — отклоняем остальные PENDING заявки
         if (currentConfirmed >= maxLimit) {
             long canConfirm = maxLimit - confirmedCount;
-            // Нет смысла обновлять запросы для 0 заявок
-            if (canConfirm > 0) {
-                List<Long> requestIdsPart = requestIds.stream().limit(canConfirm).collect(Collectors.toList());
-                requestRepository.bulkUpdateStatus(eventId, requestIdsPart, request.getStatus());
-            }
+
+            List<Long> requestIdsPart = requestIds.stream().limit(canConfirm).collect(Collectors.toList());
+            requestRepository.bulkUpdateStatus(eventId, requestIdsPart, request.getStatus());
+
             // Сначала получаем все PENDING заявки
             List<ParticipationRequest> allPendingRequests = requestRepository
                     .findAllByEventIdAndStatus(eventId, ParticipationStatus.PENDING);
