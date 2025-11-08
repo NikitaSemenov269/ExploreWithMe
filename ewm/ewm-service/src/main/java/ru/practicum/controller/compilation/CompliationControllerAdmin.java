@@ -54,9 +54,8 @@ public class CompliationControllerAdmin {
 
             // Все остальные случаи передаём глобальному обработчику
             throw e;
-        }
-        // Обработка NotFoundException
-        catch (NotFoundException e) {
+            // Обработка NotFoundException
+        } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
     }
