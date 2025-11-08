@@ -66,6 +66,11 @@ public class ParticipationRequestService {
         }
         request.setCreated(LocalDateTime.now());
         ParticipationRequest savedRequest = requestRepository.save(request);
+        if (savedRequest.getStatus() == ParticipationStatus.CONFIRMED) {
+            event.setConfirmedRequests(confirmedRequests + 1);
+            eventRepository.save(event);
+            log.info("Updated confirmedRequests for event {} to {}", eventId, event.getConfirmedRequests());
+        }
         log.info("The request was successfully created: {}", savedRequest);
         return ParticipationRequestMapper.INSTANCE.toDto(savedRequest);
     }

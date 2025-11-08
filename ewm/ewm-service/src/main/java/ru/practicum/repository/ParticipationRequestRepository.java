@@ -40,4 +40,6 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
             "WHERE r.event.id = :eventId AND r.status = 'PENDING'")
     void rejectAllPendingRequests(@Param("eventId") Long eventId,
                                   @Param("status") ParticipationStatus status);
+
+    Integer countByEventId(Long eventId);
 }
