@@ -1,6 +1,7 @@
 package ru.practicum.controller.request;
 
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.ParticipationRequestDto;
@@ -22,7 +23,7 @@ public class PrivateParticipationRequestController {
             @PathVariable @NotNull Long userId,
             @RequestParam @NotNull Long eventId) {
             ParticipationRequestDto dto = service.addRequest(userId, eventId);
-            return ResponseEntity.status(201).body(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @PatchMapping("/{requestId}/cancel")

@@ -48,10 +48,11 @@ public class ParticipationRequestService {
         if (event.getPublishedOn() == null || event.getPublishedOn().toString().trim().isEmpty()) {
             throw new ConflictException("Cannot participate in an unpublished event");
         }
-        Integer requestCount = requestRepository.countByEventId(eventId);
         Integer participantLimit = event.getParticipantLimit();
-        if (participantLimit > 0 && requestCount >= participantLimit) {
-            throw new ConflictException("Participation request limit reached for event id=" + eventId);
+        Integer confirmedRequests = event.getConfirmedRequests();
+        if(participantLimit != 0) {
+            if (confirmedRequests >= participantLimit)
+                throw new ConflictException("Participation request limit reached for event id=" + eventId);
         }
         if (requestRepository.findByRequesterIdAndEventId(userId, eventId).isPresent()) {
             throw new ConflictException("Duplicate participation request");
