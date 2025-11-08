@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.util.ObjectUtils;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.NewCompilationDto;
 import ru.practicum.dto.compilation.UpdateCompilationRequest;
@@ -101,9 +102,12 @@ public class CompilationService {
      */
     public CompilationDto saveCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = mapper.toEntity(newCompilationDto);
-        Set<Event> events = new HashSet<>(queryFactory.selectFrom(event)
-                .where(event.id.in(newCompilationDto.getEvents()))
-                .fetch());
+        Set<Event> events = new HashSet<>();
+        if (!ObjectUtils.isEmpty(newCompilationDto.getEvents())) {
+            events = new HashSet<>(queryFactory.selectFrom(event)
+                    .where(event.id.in(newCompilationDto.getEvents()))
+                    .fetch());
+        }
 
         compilation.setEvents(events);
         try {
