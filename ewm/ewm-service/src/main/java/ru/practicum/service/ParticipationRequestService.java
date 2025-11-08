@@ -50,10 +50,8 @@ public class ParticipationRequestService {
         }
         Integer participantLimit = event.getParticipantLimit();
         Integer confirmedRequests = event.getConfirmedRequests();
-        if(participantLimit != 0) {
-            if (confirmedRequests >= participantLimit) {
-                throw new ConflictException("Participation request limit reached for event id=" + eventId);
-            }
+        if (participantLimit != 0 && confirmedRequests >= participantLimit) {
+            throw new ConflictException("Participation request limit reached for event id=" + eventId);
         }
         if (requestRepository.findByRequesterIdAndEventId(userId, eventId).isPresent()) {
             throw new ConflictException("Duplicate participation request");
