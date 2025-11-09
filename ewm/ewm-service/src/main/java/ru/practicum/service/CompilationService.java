@@ -93,9 +93,17 @@ public class CompilationService {
         Compilation compilation = compRep.findById(compId).orElseThrow(
                 () -> new NotFoundException("Подборка с ID: " + compId + " не найдена."));
 
+        List<EventShortDto> eventDtos = compilation.getEvents().stream()
+                .map(eventMapper::toShortDto)
+                .toList();
+
+        CompilationDto compilationDto = mapper.toDto(compilation);
+        compilationDto.setEvents(eventDtos);
+
         log.info("Найдена подборка с ID: {}", compId);
-        return mapper.toDto(compilation);
+        return compilationDto;
     }
+
 
     /**
      * Сохранение подборки

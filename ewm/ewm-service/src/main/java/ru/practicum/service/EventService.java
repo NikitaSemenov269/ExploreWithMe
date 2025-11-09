@@ -433,7 +433,7 @@ public class EventService {
     @Transactional
     public EventRequestStatusUpdateResult updateRequestsStatus(
             Long userId, Long eventId, EventRequestStatusUpdateRequest request) {
-        // Статус можно изменить только у заявок, находящихся в состоянии ожидания
+
         if (request.getStatus() == ParticipationStatus.PENDING) {
             throw new BadRequestException("Статус 'PENDING' не может быть установлен для заявок с ID: " + request.getRequestIds());
         }
@@ -444,9 +444,11 @@ public class EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId));
 
+
         // 2. Проверяем пре‑модерацию и лимит
         boolean preModeration = event.getRequestModeration();
         int maxLimit = event.getParticipantLimit();
+
 
         if (maxLimit == 0 || !preModeration) {
             throw new ConflictException(
@@ -482,7 +484,7 @@ public class EventService {
             throw new ConflictException("Participant limit reached");
         }
 
-        // 7. Обновляем статус выбранных заявок (статус заявок ParticipationStatus.PENDING проверен в п.5)
+        // 7. Обновляем статус выбранных заявок
         List<ParticipationRequest> rejectedDueToLimit = new ArrayList<>();
         long currentConfirmed = confirmedCount;
 
@@ -490,14 +492,18 @@ public class EventService {
             currentConfirmed += requestIds.size();
         }
 
-        // 8. Смотрим сколько заявок можно добавить. Если лимит исчерпан — отклоняем остальные PENDING заявки
+        // 8. Проверяем лимит и обновляем статусы
         if (currentConfirmed >= maxLimit) {
             long canConfirm = maxLimit - confirmedCount;
 
-            List<Long> requestIdsPart = requestIds.stream().limit(canConfirm).collect(Collectors.toList());
+            List<Long> requestIdsPart = requestIds.stream()
+                    .limit(canConfirm)
+                    .collect(Collectors.toList());
+
             requestRepository.bulkUpdateStatus(eventId, requestIdsPart, request.getStatus());
 
-            // Сначала получаем все PENDING заявки
+
+            // Отклоняем оставшиеся PENDING заявки
             List<ParticipationRequest> allPendingRequests = requestRepository
                     .findAllByEventIdAndStatus(eventId, ParticipationStatus.PENDING);
 
@@ -505,8 +511,18 @@ public class EventService {
                 requestRepository.rejectAllPendingRequests(eventId, ParticipationStatus.REJECTED);
                 rejectedDueToLimit.addAll(allPendingRequests);
             }
+
+            // УВЕЛИЧИВАЕМ confirmedRequests у события
+            event.setConfirmedRequests(Math.min(maxLimit, (int) currentConfirmed));
+            eventRepository.save(event);  // Сохраняем изменение
+
+
         } else {
             requestRepository.bulkUpdateStatus(eventId, requestIds, request.getStatus());
+
+            // УВЕЛИЧИВАЕМ confirmedRequests на число подтверждённых заявок
+            event.setConfirmedRequests((int) (confirmedCount + requestIds.size()));
+            eventRepository.save(event);  // Сохраняем изменение
         }
 
         // 9. Формируем ответ
@@ -517,13 +533,16 @@ public class EventService {
                 .map(ParticipationRequest::getId)
                 .collect(Collectors.toSet());
 
+
         List<ParticipationRequestDto> confirmed = updatedRequests.stream()
                 .filter(r -> r.getStatus() == ParticipationStatus.CONFIRMED)
-                .map(ParticipationRequestMapper.INSTANCE::toDto).toList();
+                .map(ParticipationRequestMapper.INSTANCE::toDto)
+                .toList();
 
         List<ParticipationRequestDto> rejected = new ArrayList<>(updatedRequests.stream()
                 .filter(r -> r.getStatus() == ParticipationStatus.REJECTED)
-                .map(ParticipationRequestMapper.INSTANCE::toDto).toList());
+                .map(ParticipationRequestMapper.INSTANCE::toDto)
+                .toList());
 
         rejected.addAll(rejectedDueToLimit.stream()
                 .filter(r -> !alreadyRejectedIds.contains(r.getId()))
@@ -535,6 +554,7 @@ public class EventService {
                 .rejectedRequests(rejected)
                 .build();
     }
+
 
     public List<ParticipationRequestDto> getEventParticipantRequests(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
