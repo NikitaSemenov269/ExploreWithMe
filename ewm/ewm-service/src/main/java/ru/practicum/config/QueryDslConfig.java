@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;

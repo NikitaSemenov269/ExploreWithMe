@@ -1,6 +1,7 @@
 package ru.practicum.controller.request;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +12,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/requests")
+@RequiredArgsConstructor
 public class PrivateParticipationRequestController {
     private final ParticipationRequestService service;
-
-    public PrivateParticipationRequestController(ParticipationRequestService service) {
-        this.service = service;
-    }
 
     @PostMapping()
     public ResponseEntity<ParticipationRequestDto> addRequest(
