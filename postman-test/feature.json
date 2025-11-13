@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "cc574e42-0e8a-4d06-a71a-46cf8cf47fa2",
+		"_postman_id": "b2c18639-b233-4168-ac0b-b6a421f56f8e",
 		"name": "feature",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "44900768"
+		"_exporter_id": "46096025"
 	},
 	"item": [
 		{
@@ -518,6 +518,16 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "eventId",
+			"value": ""
 		}
 	]
 }
