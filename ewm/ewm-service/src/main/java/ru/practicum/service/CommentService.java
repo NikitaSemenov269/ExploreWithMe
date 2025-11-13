@@ -48,7 +48,7 @@ public class CommentService {
 
         // Статус события должен быть "Опубликовано"
         if (!PUBLISHED.equals(event.getState())) {
-            throw new ConflictException("Статус события не соответствует ожидаемому.");
+            throw new ConflictException("Статус события: " + event.getState() +" не соответствует ожидаемому.");
         }
 
         if (event.getEventDate().isBefore(newCommentDto.getCreatedOn())) {
@@ -62,10 +62,7 @@ public class CommentService {
          */
         if (event.getRequestModeration()) {
             // Поиск заявки на участие в событии
-            if (!partReqRep.existsByRequesterIdAndEventIdAndStatus(
-                    userId,
-                    eventId,
-                    CONFIRMED)) {
+            if (!partReqRep.existsByRequesterIdAndEventIdAndStatus(userId, eventId, CONFIRMED)) {
                 throw new ConflictException("Пользователь с ID: "
                         + userId + " не найден среди участников события с ID: "
                         + eventId);
@@ -89,7 +86,7 @@ public class CommentService {
 
             return commentDto;
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Ошибка при сохранении нового комментария.");
+            throw new ConflictException("Непредвиденная ошибка при сохранении нового комментария.");
         }
     }
 
@@ -120,7 +117,7 @@ public class CommentService {
         Comment comment = commRep.findById(commentId).orElseThrow(
                 () -> new NotFoundException("Комментарий с ID: " + commentId + " не найден."));
 
-        if (userRep.existsById(userId)) throw new ConflictException("Пользователя с ID: "
+        if (!userRep.existsById(userId)) throw new ConflictException("Пользователя с ID: "
                 + userId + " не существует.");
 
         // Проверка прав пользователя
@@ -128,6 +125,13 @@ public class CommentService {
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new ConflictException("Вы не являетесь автором комментария с ID: " + commentId
                     + " и потому не можете удалить его.");
+        }
+
+        try {
+            commRep.delete(comment);
+            log.info("Успешное удаление комментария с ID: {}", commentId);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Непредвиденная ошибка при удалении комментария с ID: " + commentId);
         }
     }
 }

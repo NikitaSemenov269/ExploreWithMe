@@ -1,5 +1,6 @@
 package ru.practicum.controller.comment;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class CommentControllerPrivate {
     @PostMapping
     public ResponseEntity<CommentDto> addComment(
             @RequestParam @Min(1) Long userId,
-            @RequestBody NewCommentDto newCommentDto) {
+            @RequestBody @Valid NewCommentDto newCommentDto) {
 
         return ResponseEntity.ok(commService.addComment(userId, newCommentDto));
     }
