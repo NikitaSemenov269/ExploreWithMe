@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NewCommentDto {
 
-    @NotBlank
+    @NotBlank(message = "Комментарий не может быть пустой строкой, или null.")
     private String comment;
 
-    @NotNull
+    @NotNull(message = "Дата создания не может быть null.")
     private LocalDateTime createdOn;
 
-    @NotNull
+    @NotNull(message = "ID события не может быть null.")
     private Long eventId;
 
 }
