@@ -48,7 +48,7 @@ public class CommentService {
 
         // Статус события должен быть "Опубликовано"
         if (!PUBLISHED.equals(event.getState())) {
-            throw new ConflictException("Статус события: " + event.getState() +" не соответствует ожидаемому.");
+            throw new ConflictException("Статус события: " + event.getState() + " не соответствует ожидаемому.");
         }
 
         if (event.getEventDate().isBefore(newCommentDto.getCreatedOn())) {
