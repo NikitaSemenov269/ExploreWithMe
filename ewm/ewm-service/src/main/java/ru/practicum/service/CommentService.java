@@ -117,7 +117,7 @@ public class CommentService {
         Comment comment = commRep.findById(commentId).orElseThrow(
                 () -> new NotFoundException("Комментарий с ID: " + commentId + " не найден."));
 
-        if (userRep.existsById(userId)) throw new ConflictException("Пользователя с ID: "
+        if (!userRep.existsById(userId)) throw new ConflictException("Пользователя с ID: "
                 + userId + " не существует.");
 
         // Проверка прав пользователя
