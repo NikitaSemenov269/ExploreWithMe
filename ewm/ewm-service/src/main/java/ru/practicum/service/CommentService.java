@@ -18,7 +18,7 @@ import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRequestRepository;
 import ru.practicum.repository.UserRepository;
 
-import java.awt.print.Pageable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
