@@ -9,10 +9,10 @@ import ru.practicum.model.Comment;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    Comment toEntity (NewCommentDto newCommentDto);
+    Comment toEntity(NewCommentDto newCommentDto);
 
     @Mapping(target = "authorId", source = "author.id")
     @Mapping(target = "authorName", source = "author.name")
     @Mapping(target = "createdOn", source = "createdOn", dateFormat = "yyyy-MM-dd HH:mm:ss")
-    CommentDto toDto (Comment comment);
+    CommentDto toDto(Comment comment);
 }
