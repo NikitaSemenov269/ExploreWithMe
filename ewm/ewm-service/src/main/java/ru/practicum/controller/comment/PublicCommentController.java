@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events/{eventId}/comments")
-public class CommentController {
+public class PublicCommentController {
     private final CommentService commService;
 
     @GetMapping

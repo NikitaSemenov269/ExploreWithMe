@@ -13,11 +13,7 @@ import ru.practicum.service.CommentService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/comments")
-public class CommentControllerPrivate {
-    /*
-     * добавление комментариев;
-     * удаление комментариев;
-     *  */
+public class PrivateCommentController {
     private final CommentService commService;
 
     @PostMapping
