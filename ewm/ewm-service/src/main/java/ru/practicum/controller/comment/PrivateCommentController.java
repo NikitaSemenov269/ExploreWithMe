@@ -18,7 +18,7 @@ public class PrivateCommentController {
 
     @PostMapping
     public ResponseEntity<CommentDto> addComment(
-            @RequestParam @Min(1) Long userId,
+            @PathVariable @Min(1) Long userId,
             @RequestBody @Valid NewCommentDto newCommentDto) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(commService.addComment(userId, newCommentDto));
@@ -26,7 +26,7 @@ public class PrivateCommentController {
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
-            @RequestParam @Min(1) Long userId,
+            @PathVariable @Min(1) Long userId,
             @PathVariable @Min(1) Long commentId) {
 
         commService.deleteComment(userId, commentId);
