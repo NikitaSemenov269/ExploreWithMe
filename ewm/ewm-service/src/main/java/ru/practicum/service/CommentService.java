@@ -18,7 +18,7 @@ import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRequestRepository;
 import ru.practicum.repository.UserRepository;
 
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +51,7 @@ public class CommentService {
             throw new ConflictException("Статус события: " + event.getState() + " не соответствует ожидаемому.");
         }
 
-        if (event.getEventDate().isBefore(newCommentDto.getCreatedOn())) {
+        if (LocalDateTime.now().isBefore(event.getEventDate())) {
             throw new ConflictException("Возможность прокомментировать событие откроется после его окончания.");
         }
 
@@ -74,6 +74,7 @@ public class CommentService {
 
         try {
             Comment comment = mapper.toEntity(newCommentDto);
+            comment.setCreatedOn(LocalDateTime.now());
             comment.setEvent(event);
             comment.setAuthor(user);
 
