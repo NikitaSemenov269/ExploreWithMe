@@ -51,10 +51,6 @@ public class CommentService {
             throw new ConflictException("Статус события: " + event.getState() + " не соответствует ожидаемому.");
         }
 
-      /*  if (LocalDateTime.now().isBefore(event.getEventDate())) {
-            throw new ConflictException("Возможность прокомментировать событие откроется после его окончания.");
-        }*/
-
         /*
          * Нужна ли пре-модерация заявок на участие
          * true - заявки должны одобряться инициатором
