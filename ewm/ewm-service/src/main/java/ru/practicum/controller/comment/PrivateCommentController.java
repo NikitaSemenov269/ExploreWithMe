@@ -21,7 +21,7 @@ public class PrivateCommentController {
             @RequestParam @Min(1) Long userId,
             @RequestBody @Valid NewCommentDto newCommentDto) {
 
-        return ResponseEntity.ok(commService.addComment(userId, newCommentDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(commService.addComment(userId, newCommentDto));
     }
 
     @DeleteMapping("/{commentId}")
