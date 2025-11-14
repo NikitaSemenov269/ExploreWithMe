@@ -12,6 +12,11 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
+							"// Устанавливаем baseUrl если не установлен",
+							"if (!pm.collectionVariables.get(\"baseUrl\")) {",
+							"    pm.collectionVariables.set(\"baseUrl\", \"http://localhost:8080\");",
+							"}",
+							"",
 							"const main = async () => {",
 							"    const api = new API(pm);",
 							"    const rnd = new RandomUtils();",
@@ -20,7 +25,7 @@
 							"        const user = await api.addUser(rnd.getUser());",
 							"        const category = await api.addCategory(rnd.getCategory());",
 							"        const eventData = rnd.getEvent(category.id);",
-							"        eventData.eventDate = rnd.getPastDateTime(2);",
+							"        eventData.eventDate = rnd.getFutureDateTime(3); // +3 часа в будущее",
 							"        const event = await api.addEvent(user.id, eventData);",
 							"        await api.publishEvent(event.id);",
 							"        const commentator = await api.addUser(rnd.getUser());",
@@ -114,6 +119,11 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
+							"// Устанавливаем baseUrl если не установлен",
+							"if (!pm.collectionVariables.get(\"baseUrl\")) {",
+							"    pm.collectionVariables.set(\"baseUrl\", \"http://localhost:8080\");",
+							"}",
+							"",
 							"if (!pm.collectionVariables.get(\"commentId\")) {",
 							"    const main = async () => {",
 							"        const api = new API(pm);",
@@ -121,7 +131,7 @@
 							"        const user = await api.addUser(rnd.getUser());",
 							"        const category = await api.addCategory(rnd.getCategory());",
 							"        const eventData = rnd.getEvent(category.id);",
-							"        eventData.eventDate = rnd.getPastDateTime(2);",
+							"        eventData.eventDate = rnd.getFutureDateTime(3); // +3 часа в будущее",
 							"        const event = await api.addEvent(user.id, eventData);",
 							"        await api.publishEvent(event.id);",
 							"        const commentData = {",
@@ -197,6 +207,11 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
+							"// Устанавливаем baseUrl если не установлен",
+							"if (!pm.collectionVariables.get(\"baseUrl\")) {",
+							"    pm.collectionVariables.set(\"baseUrl\", \"http://localhost:8080\");",
+							"}",
+							"",
 							"const main = async () => {",
 							"    const api = new API(pm);",
 							"    const rnd = new RandomUtils();",
@@ -205,7 +220,7 @@
 							"        const user2 = await api.addUser(rnd.getUser());",
 							"        const category = await api.addCategory(rnd.getCategory());",
 							"        const eventData = rnd.getEvent(category.id);",
-							"        eventData.eventDate = rnd.getPastDateTime(3);",
+							"        eventData.eventDate = rnd.getFutureDateTime(4); // +4 часа в будущее",
 							"        const event = await api.addEvent(user1.id, eventData);",
 							"        await api.publishEvent(event.id);",
 							"        const comment1 = await api.addComment(user1.id, {",
@@ -303,8 +318,13 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
+					"// Устанавливаем baseUrl по умолчанию",
+					"if (!pm.collectionVariables.get(\"baseUrl\")) {",
+					"    pm.collectionVariables.set(\"baseUrl\", \"http://localhost:8080\");",
+					"}",
+					"",
 					"API = class {",
-					"    constructor(postman, verbose = false, baseUrl = \"http://localhost:8080\") {",
+					"    constructor(postman, verbose = false, baseUrl = pm.collectionVariables.get(\"baseUrl\")) {",
 					"        this.baseUrl = baseUrl;",
 					"        this.pm = postman;",
 					"        this._verbose = verbose;",
@@ -387,7 +407,7 @@
 					"            annotation: pm.variables.replaceIn('{{$randomLoremParagraph}}'),",
 					"            category: categoryId,",
 					"            description: pm.variables.replaceIn('{{$randomLoremParagraphs}}'),",
-					"            eventDate: this.getFutureDateTime(),",
+					"            eventDate: this.getFutureDateTime(3), // По умолчанию +3 часа",
 					"            location: {",
 					"                lat: parseFloat(pm.variables.replaceIn('{{$randomLatitude}}')),",
 					"                lon: parseFloat(pm.variables.replaceIn('{{$randomLongitude}}')),",
@@ -398,18 +418,12 @@
 					"            title: pm.variables.replaceIn('{{$randomLoremSentence}}'),",
 					"        }",
 					"    }",
-					"    getFutureDateTime(hourShift = 5, minuteShift=0, yearShift=0) {",
+					"    getFutureDateTime(hourShift = 3, minuteShift=0, yearShift=0) {",
 					"        let moment = require('moment');",
 					"        let m = moment();",
 					"        m.add(hourShift, 'hour');",
 					"        m.add(minuteShift, 'minute');",
 					"        m.add(yearShift, 'year');",
-					"        return m.format('YYYY-MM-DD HH:mm:ss');",
-					"    }",
-					"    getPastDateTime(hourShift = 1) {",
-					"        let moment = require('moment');",
-					"        let m = moment();",
-					"        m.subtract(hourShift, 'hour');",
 					"        return m.format('YYYY-MM-DD HH:mm:ss');",
 					"    }",
 					"}"
@@ -418,6 +432,10 @@
 		}
 	],
 	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080"
+		},
 		{
 			"key": "userId",
 			"value": ""
