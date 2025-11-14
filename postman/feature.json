@@ -80,7 +80,7 @@
               "    pm.expect(response.createdOn).to.match(dateRegex);",
               "});",
               "pm.test(\"authorId должен совпадать с userId из запроса\", function () {",
-              "    pm.expect(response.authorId.toString()).to.equal(pm.collectionVariables.get(\"userId\"));",
+              "pm.expect(response.authorId).to.equal(parseInt(pm.collectionVariables.get(\"userId\")));",
               "});",
               "pm.collectionVariables.set(\"commentId\", response.id);"
             ],
