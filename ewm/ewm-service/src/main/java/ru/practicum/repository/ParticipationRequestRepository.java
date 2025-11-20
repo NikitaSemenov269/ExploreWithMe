@@ -16,6 +16,10 @@ import java.util.Optional;
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
     Optional<ParticipationRequest> findByRequesterIdAndEventId(Long userId, Long eventId);
 
+    Boolean existsByRequesterIdAndEventIdAndStatus(Long userId,
+                                                   Long eventId,
+                                                   ParticipationStatus status);
+
     List<ParticipationRequest> findAllByRequesterId(Long userId);
 
     List<ParticipationRequest> findAllByEventId(Long eventId);

@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "b2c18639-b233-4168-ac0b-b6a421f56f8e",
+		"name": "comments-api-tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Создание комментария",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {",
+							"    const api = new API(pm);",
+							"    const rnd = new RandomUtils();",
+							"    ",
+							"    try {",
+							"        const user = await api.addUser(rnd.getUser());",
+							"        const category = await api.addCategory(rnd.getCategory());",
+							"        const eventData = rnd.getEvent(category.id);",
+							"        eventData.eventDate = rnd.getPastDateTime(2);",
+							"        const event = await api.addEvent(user.id, eventData);",
+							"        await api.publishEvent(event.id);",
+							"        const commentator = await api.addUser(rnd.getUser());",
+							"        pm.collectionVariables.set(\"userId\", commentator.id);",
+							"        pm.collectionVariables.set(\"eventId\", event.id);",
+							"    } catch(err) {",
+							"        console.error(\"Ошибка при подготовке тестовых данных:\", err);",
+							"    }",
+							"};",
+							"const interval = setInterval(() => {}, 1000);",
+							"setTimeout(async () => {",
+							"    try {",
+							"        await main();",
+							"    } catch (e) {",
+							"        console.error(e);",
+							"    } finally {",
+							"        clearInterval(interval);",
+							"    }",
+							"}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"При создании должен возвращаться статус 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"pm.test(\"Ответ должен содержать тело в формате JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"const response = pm.response.json();",
+							"pm.test(\"Комментарий должен содержать все обязательные поля\", function () {",
+							"    pm.expect(response).to.have.property('id');",
+							"    pm.expect(response).to.have.property('comment');",
+							"    pm.expect(response).to.have.property('createdOn');",
+							"    pm.expect(response).to.have.property('authorId');",
+							"    pm.expect(response).to.have.property('authorName');",
+							"});",
+							"pm.test(\"Формат даты должен быть yyyy-MM-dd HH:mm:ss\", function () {",
+							"    const dateRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"    pm.expect(response.createdOn).to.match(dateRegex);",
+							"});",
+							"pm.test(\"authorId должен совпадать с userId из запроса\", function () {",
+							"    pm.expect(response.authorId.toString()).to.equal(pm.collectionVariables.get(\"userId\"));",
+							"});",
+							"pm.collectionVariables.set(\"commentId\", response.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"comment\": \"Это тестовый комментарий для проверки API\",\n  \"eventId\": {{eventId}}\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/users/{{userId}}/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"{{userId}}",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Удаление комментария",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"if (!pm.collectionVariables.get(\"commentId\")) {",
+							"    const main = async () => {",
+							"        const api = new API(pm);",
+							"        const rnd = new RandomUtils();",
+							"        const user = await api.addUser(rnd.getUser());",
+							"        const category = await api.addCategory(rnd.getCategory());",
+							"        const eventData = rnd.getEvent(category.id);",
+							"        eventData.eventDate = rnd.getPastDateTime(2);",
+							"        const event = await api.addEvent(user.id, eventData);",
+							"        await api.publishEvent(event.id);",
+							"        const commentData = {",
+							"            comment: \"Комментарий для теста удаления\",",
+							"            eventId: event.id",
+							"        };",
+							"        const comment = await api.addComment(user.id, commentData);",
+							"        pm.collectionVariables.set(\"userId\", user.id);",
+							"        pm.collectionVariables.set(\"commentId\", comment.id);",
+							"        pm.collectionVariables.set(\"eventId\", event.id);",
+							"    };",
+							"    const interval = setInterval(() => {}, 1000);",
+							"    setTimeout(async () => {",
+							"        try {",
+							"            await main();",
+							"        } catch (e) {",
+							"            console.error(e);",
+							"        } finally {",
+							"            clearInterval(interval);",
+							"        }",
+							"    }, 100);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"При удалении должен возвращаться статус 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});",
+							"pm.sendRequest({",
+							"    url: pm.collectionVariables.get(\"baseUrl\") + \"/events/\" + pm.collectionVariables.get(\"eventId\") + \"/comments\",",
+							"    method: 'GET',",
+							"}, (error, response) => {",
+							"    if (!error && response.code === 200) {",
+							"        const comments = response.json();",
+							"        const deletedComment = comments.find(c => c.id == pm.collectionVariables.get(\"commentId\"));",
+							"        pm.test(\"Удаленный комментарий не должен находиться в списке\", function () {",
+							"            pm.expect(deletedComment).to.be.undefined;",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/users/{{userId}}/comments/{{commentId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"users",
+						"{{userId}}",
+						"comments",
+						"{{commentId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Получение комментариев события",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const main = async () => {",
+							"    const api = new API(pm);",
+							"    const rnd = new RandomUtils();",
+							"    try {",
+							"        const user1 = await api.addUser(rnd.getUser());",
+							"        const user2 = await api.addUser(rnd.getUser());",
+							"        const category = await api.addCategory(rnd.getCategory());",
+							"        const eventData = rnd.getEvent(category.id);",
+							"        eventData.eventDate = rnd.getPastDateTime(3);",
+							"        const event = await api.addEvent(user1.id, eventData);",
+							"        await api.publishEvent(event.id);",
+							"        const comment1 = await api.addComment(user1.id, {",
+							"            comment: \"Первый тестовый комментарий\",",
+							"            eventId: event.id",
+							"        });",
+							"        const comment2 = await api.addComment(user2.id, {",
+							"            comment: \"Второй тестовый комментарий\", ",
+							"            eventId: event.id",
+							"        });",
+							"        pm.collectionVariables.set(\"eventId\", event.id);",
+							"        pm.collectionVariables.set(\"comment1Id\", comment1.id);",
+							"        pm.collectionVariables.set(\"comment2Id\", comment2.id);",
+							"    } catch(err) {",
+							"        console.error(\"Ошибка при подготовке тестовых данных:\", err);",
+							"    }",
+							"};",
+							"const interval = setInterval(() => {}, 1000);",
+							"setTimeout(async () => {",
+							"    try {",
+							"        await main();",
+							"    } catch (e) {",
+							"        console.error(e);",
+							"    } finally {",
+							"        clearInterval(interval);",
+							"    }",
+							"}, 100);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус ответа должен быть 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Ответ должен быть валидным JSON\", function () {",
+							"    pm.response.to.be.withBody;",
+							"    pm.response.to.be.json;",
+							"});",
+							"const response = pm.response.json();",
+							"pm.test(\"Ответ должен быть массивом\", function () {",
+							"    pm.expect(response).to.be.an('array');",
+							"});",
+							"if (response.length > 0) {",
+							"    pm.test(\"Каждый комментарий должен содержать все обязательные поля\", function () {",
+							"        response.forEach(comment => {",
+							"            pm.expect(comment).to.have.property('id');",
+							"            pm.expect(comment).to.have.property('comment');",
+							"            pm.expect(comment).to.have.property('createdOn');",
+							"            pm.expect(comment).to.have.property('authorId');",
+							"            pm.expect(comment).to.have.property('authorName');",
+							"        });",
+							"    });",
+							"    pm.test(\"Формат даты у всех комментариев должен быть корректным\", function () {",
+							"        response.forEach(comment => {",
+							"            const dateRegex = /^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/;",
+							"            pm.expect(comment.createdOn).to.match(dateRegex);",
+							"        });",
+							"    });",
+							"    pm.test(\"Созданные комментарии должны присутствовать в списке\", function () {",
+							"        const commentIds = response.map(c => c.id);",
+							"        pm.expect(commentIds).to.include(pm.collectionVariables.get(\"comment1Id\"));",
+							"        pm.expect(commentIds).to.include(pm.collectionVariables.get(\"comment2Id\"));",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/events/{{eventId}}/comments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"events",
+						"{{eventId}}",
+						"comments"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"API = class {",
+					"    constructor(postman, verbose = false, baseUrl = \"http://localhost:8080\") {",
+					"        this.baseUrl = baseUrl;",
+					"        this.pm = postman;",
+					"        this._verbose = verbose;",
+					"    }",
+					"    async addUser(user, verbose=null) {",
+					"        return this.post(\"/admin/users\", user, \"Ошибка при добавлении нового пользователя: \", verbose);",
+					"    }",
+					"    async addCategory(category, verbose=null) {",
+					"        return this.post(\"/admin/categories\", category, \"Ошибка при добавлении новой категории: \", verbose);",
+					"    }",
+					"    async addEvent(userId, event, verbose=null) {",
+					"        return this.post(\"/users/\" + userId + \"/events\", event, \"Ошибка при добавлении нового события: \", verbose);",
+					"    }",
+					"    async addComment(userId, comment, verbose=null) {",
+					"        return this.post(\"/users/\" + userId + \"/comments\", comment, \"Ошибка при добавлении нового комментария: \", verbose);",
+					"    }",
+					"    async publishEvent(eventId, verbose=null) {",
+					"        return this.patch('/admin/events/' + eventId, {stateAction: \"PUBLISH_EVENT\"}, \"Ошибка при публикации события\", verbose);",
+					"    }",
+					"    async post(path, body, errorText = \"Ошибка при выполнении post-запроса: \", verbose=null) {",
+					"        return this.sendRequest(\"POST\", path, body, errorText, verbose);",
+					"    }",
+					"    async patch(path, body = null, errorText = \"Ошибка при выполнении patch-запроса: \", verbose=null) {",
+					"        return this.sendRequest(\"PATCH\", path, body, errorText, verbose);",
+					"    }",
+					"    async sendRequest(method, path, body=null, errorText = \"Ошибка при выполнении запроса: \", verbose=null) {",
+					"        return new Promise((resolve, reject) => {",
+					"            verbose = verbose == null ? this._verbose : verbose;",
+					"            const request = {",
+					"                url: this.baseUrl + path,",
+					"                method: method,",
+					"                body: body == null ? \"\" : JSON.stringify(body),",
+					"                header: { \"Content-Type\": \"application/json\" },",
+					"            };",
+					"            if(verbose) {",
+					"                console.log(\"Отправляю запрос: \", request);",
+					"            }",
+					"            try {",
+					"                this.pm.sendRequest(request, (error, response) => {",
+					"                    if(error || (response.code >= 400 && response.code <= 599)) {",
+					"                        let err = error ? error : JSON.stringify(response.json());",
+					"                        console.error(\"При выполнении запроса к серверу возникла ошика.\\n\", err,",
+					"                             \"\\nДля отладки проблемы повторите такой же запрос к вашей программе \" + ",
+					"                             \"на локальном компьютере. Данные запроса:\\n\", JSON.stringify(request));",
+					"                        reject(new Error(errorText + err));",
+					"                    }",
+					"                    if(verbose) {",
+					"                        console.log(\"Результат обработки запроса: код состояния - \", response.code, \", тело: \", response.json());",
+					"                    }",
+					"                    if (response.stream.length === 0){",
+					"                        reject(new Error('Отправлено пустое тело ответа'))",
+					"                    }else{",
+					"                        resolve(response.json());",
+					"                    }",
+					"                });",
+					"            } catch(err) {",
+					"                if(verbose) {",
+					"                    console.error(errorText, err);",
+					"                }",
+					"                return Promise.reject(err);",
+					"            }",
+					"        });",
+					"    }",
+					"};",
+					"RandomUtils = class {",
+					"    constructor() {}",
+					"    getUser() {",
+					"        return {",
+					"            name: pm.variables.replaceIn('{{$randomFullName}}'),",
+					"            email: pm.variables.replaceIn('{{$randomEmail}}')",
+					"        };",
+					"    }",
+					"    getCategory() {",
+					"        return {",
+					"            name: pm.variables.replaceIn('{{$randomWord}}') + Math.floor(Math.random() * 10000 * Math.random()).toString()",
+					"        };",
+					"    }",
+					"    getEvent(categoryId) {",
+					"        return {",
+					"            annotation: pm.variables.replaceIn('{{$randomLoremParagraph}}'),",
+					"            category: categoryId,",
+					"            description: pm.variables.replaceIn('{{$randomLoremParagraphs}}'),",
+					"            eventDate: this.getFutureDateTime(),",
+					"            location: {",
+					"                lat: parseFloat(pm.variables.replaceIn('{{$randomLatitude}}')),",
+					"                lon: parseFloat(pm.variables.replaceIn('{{$randomLongitude}}')),",
+					"            },",
+					"            paid: pm.variables.replaceIn('{{$randomBoolean}}'),",
+					"            participantLimit: pm.variables.replaceIn('{{$randomInt}}'),",
+					"            requestModeration: pm.variables.replaceIn('{{$randomBoolean}}'),",
+					"            title: pm.variables.replaceIn('{{$randomLoremSentence}}'),",
+					"        }",
+					"    }",
+					"    getFutureDateTime(hourShift = 5, minuteShift=0, yearShift=0) {",
+					"        let moment = require('moment');",
+					"        let m = moment();",
+					"        m.add(hourShift, 'hour');",
+					"        m.add(minuteShift, 'minute');",
+					"        m.add(yearShift, 'year');",
+					"        return m.format('YYYY-MM-DD HH:mm:ss');",
+					"    }",
+					"    getPastDateTime(hourShift = 1) {",
+					"        let moment = require('moment');",
+					"        let m = moment();",
+					"        m.subtract(hourShift, 'hour');",
+					"        return m.format('YYYY-MM-DD HH:mm:ss');",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "eventId",
+			"value": ""
+		},
+		{
+			"key": "commentId",
+			"value": ""
+		}
+	]
+}
